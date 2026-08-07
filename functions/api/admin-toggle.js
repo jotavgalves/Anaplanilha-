@@ -20,12 +20,14 @@ const PROFILES = {
   ana: {
     profile: 'ana',
     profileName: 'Ana',
+    sellerName: 'Ana',
     sheetUrl: 'https://docs.google.com/spreadsheets/d/1EdkihhLcVQiUlJMb54RknQTHzq6RyqNhNzONvzBbTpM',
     sheetName: 'VENDA DO MÊS'
   },
   dayane: {
     profile: 'dayane',
     profileName: 'Dayane',
+    sellerName: 'Dayane',
     sheetUrl: 'https://docs.google.com/spreadsheets/d/1yuR43gP2_kPMZpySYeiyJIJXRwGchvosa31fhigVoMw',
     sheetName: 'VENNDA DO MÊS'
   }
@@ -56,7 +58,7 @@ export async function onRequestPost({ request, env }) {
       ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
     `).bind(JSON.stringify(updated), now).run();
 
-    return json({ ok: true, profile: next.profile, profileName: next.profileName, settings: updated, updatedAt: now });
+    return json({ ok: true, profile: next.profile, profileName: next.profileName, sellerName: next.sellerName, settings: updated, updatedAt: now });
   } catch (error) {
     return json({ ok: false, error: error.message || 'Erro ao alternar perfil' }, 503);
   }
