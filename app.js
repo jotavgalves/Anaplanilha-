@@ -1,11 +1,11 @@
 (()=>{
   const addCss=href=>{const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)};
-  addCss('./mobile-v2.css?v=20260807-1720');
-  addCss('./source-fix.css?v=20260807-1720');
-  addCss('./enhancements.css?v=20260807-1720');
-  addCss('./integrity.css?v=20260807-1720');
-  addCss('./controls-v2.css?v=20260807-1720');
-  addCss('./admin-mode.css?v=20260807-1720');
+  addCss('./mobile-v2.css?v=20260807-1730');
+  addCss('./source-fix.css?v=20260807-1730');
+  addCss('./enhancements.css?v=20260807-1730');
+  addCss('./integrity.css?v=20260807-1730');
+  addCss('./controls-v2.css?v=20260807-1730');
+  addCss('./admin-mode.css?v=20260807-1730');
 
   const loadScript=src=>new Promise((resolve,reject)=>{
     const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));document.body.appendChild(s);
@@ -13,22 +13,22 @@
 
   (async()=>{
     try{
-      await loadScript('./app-1.js?v=20260807-1720');
-      await loadScript('./cloud-state.js?v=20260807-1720');
+      await loadScript('./app-1.js?v=20260807-1730');
+      await loadScript('./cloud-state.js?v=20260807-1730');
       if(window.__cloudStateReady) await window.__cloudStateReady;
-      await loadScript('./app-2.js?v=20260807-1720');
-      await loadScript('./perf-core.js?v=20260807-1720');
-      await loadScript('./audit-pre.js?v=20260807-1720');
-      await loadScript('./app-3.js?v=20260807-1720');
-      await loadScript('./perf-after.js?v=20260807-1720');
-      await loadScript('./cloud-after.js?v=20260807-1720');
-      await loadScript('./mobile-ui.js?v=20260807-1720');
-      await loadScript('./mobile-ui-v2.js?v=20260807-1720');
-      await loadScript('./source-fix.js?v=20260807-1720');
-      await loadScript('./enhancements.js?v=20260807-1720');
-      await loadScript('./integrity.js?v=20260807-1720');
-      await loadScript('./controls-v2.js?v=20260807-1720');
-      await loadScript('./admin-mode.js?v=20260807-1720');
+      await loadScript('./app-2.js?v=20260807-1730');
+      await loadScript('./perf-core.js?v=20260807-1730');
+      await loadScript('./audit-pre.js?v=20260807-1730');
+      await loadScript('./app-3.js?v=20260807-1730');
+      await loadScript('./perf-after.js?v=20260807-1730');
+      await loadScript('./cloud-after.js?v=20260807-1730');
+      await loadScript('./mobile-ui.js?v=20260807-1730');
+      await loadScript('./mobile-ui-v2.js?v=20260807-1730');
+      await loadScript('./source-fix.js?v=20260807-1730');
+      await loadScript('./enhancements.js?v=20260807-1730');
+      await loadScript('./integrity.js?v=20260807-1730');
+      await loadScript('./controls-v2.js?v=20260807-1730');
+      await loadScript('./admin-mode.js?v=20260807-1730');
     }catch(error){
       console.error(error);const banner=document.querySelector('#banner');if(banner){banner.style.display='block';banner.textContent='Falha ao iniciar o sistema. Atualize a página.';}
     }
