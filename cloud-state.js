@@ -23,9 +23,8 @@ function queueCloudWrite(key, value) {
       return result;
     })
     .catch(error => {
-      cloudOnline = false;
-      if (typeof toast === "function") toast("Não consegui salvar no banco. Tente novamente.");
       console.error("Falha ao salvar no D1", key, error);
+      if (typeof toast === "function") toast("Não consegui salvar esta alteração no banco.");
     });
   return cloudWriteChain;
 }
@@ -65,17 +64,26 @@ function clearLegacyLocalState() {
 async function loadCloudState() {
   try {
     const data = await cloudRequest("GET");
-    cloudState = Object.assign(structuredClone(CLOUD_DEFAULTS), data.state || {});
+    const remoteState = Object.assign(structuredClone(CLOUD_DEFAULTS), data.state || {});
+    cloudState = remoteState;
     cloudOnline = true;
 
     const legacy = oldLocalState();
-    if (!hasMeaningfulCloudState(cloudState) && hasMeaningfulLocalState(legacy)) {
-      cloudState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy);
-      for (const key of ["manual","pending","notes","audit","settings","snapshot"]) {
-        await cloudRequest("PUT", key, cloudState[key]);
+    if (!hasMeaningfulCloudState(remoteState) && hasMeaningfulLocalState(legacy)) {
+      const migratedState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy);
+      try {
+        for (const key of ["manual","pending","notes","audit","settings","snapshot"]) {
+          await cloudRequest("PUT", key, migratedState[key]);
+        }
+        cloudState = migratedState;
+        clearLegacyLocalState();
+      } catch (migrationError) {
+        console.warn("D1 conectado, mas a migração do cache antigo não foi concluída", migrationError);
+        cloudState = remoteState;
       }
+    } else {
+      clearLegacyLocalState();
     }
-    clearLegacyLocalState();
     return true;
   } catch (error) {
     cloudOnline = false;
@@ -129,7 +137,7 @@ function showDatabaseWarning(){
   const b=$("#banner");
   if(!b)return;
   b.style.display="block";
-  b.innerHTML='<b>Salvamento online não conectado.</b> Vincule um banco Cloudflare D1 ao Pages usando o binding <b>DB</b>. As vendas da planilha continuam funcionando, mas mudanças manuais ainda não ficam persistidas.';
+  b.innerHTML='<b>Salvamento online não conectado.</b> Vincule um banco Cloudflare D1 ao Pages usando o binding <b>DB</b>.';
 }
 
 sync = async function(){
@@ -159,4 +167,14 @@ window.cloudNotes = function(){ return cloudState.notes || {}; };
 window.saveCloudNotes = function(value){ cloudState.notes = value; return queueCloudWrite("notes", value); };
 window.cloudAudit = function(){ return cloudState.audit || []; };
 window.cloudStateOnline = function(){ return cloudOnline; };
+window.refreshCloudHealth = async function(){
+  try {
+    await cloudRequest("GET");
+    cloudOnline = true;
+    return true;
+  } catch (error) {
+    cloudOnline = false;
+    return false;
+  }
+};
 window.__cloudStateReady = loadCloudState();
