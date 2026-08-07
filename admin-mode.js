@@ -23,10 +23,9 @@
   allPaidRows=function(){
     const all=baseAllPaidRows();
     const seller=norm(cfg().sellerName||currentProfile().name);
-    const sheet=all.filter(r=>r.source==='sheet');
+    const sheet=all.filter(r=>r.source==='sheet'&&norm(r.seller)===seller);
     const manual=all.filter(r=>r.source==='manual');
-    const matchingSheet=sheet.filter(r=>norm(r.seller)===seller);
-    return [...(matchingSheet.length?matchingSheet:sheet),...manual];
+    return [...sheet,...manual];
   };
 
   const originalSwitch=window.switchView||switchView;
@@ -72,17 +71,26 @@
 
     async function credential(){
       const password=input.value.trim();
-      if(!password){feedback.className='admin-credential-feedback error';feedback.textContent='Digite a senha administrativa.';return;}
+      if(!password){
+        feedback.className='admin-credential-feedback error';
+        feedback.textContent='Digite a senha administrativa.';
+        return;
+      }
+
       button.disabled=true;
       feedback.className='admin-credential-feedback';
-      feedback.textContent='Validando credencial...';
+      feedback.textContent='Validando credencial no banco...';
+
       try{
-        const response=await fetch('/api/admin-toggle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password}),cache:'no-store'});
+        const response=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'toggleProfile',password}),cache:'no-store'});
         const data=await response.json().catch(()=>({}));
         if(!response.ok||!data.ok)throw new Error(data.error||`HTTP ${response.status}`);
+        if(!data.settings||!data.profileName)throw new Error('O servidor não retornou o novo perfil.');
 
-        if(typeof window.applyRemoteSettings==='function')window.applyRemoteSettings(data.settings);
+        if(typeof window.applyRemoteSettings!=='function')throw new Error('Estado online ainda não foi inicializado. Atualize a página e tente novamente.');
+        window.applyRemoteSettings(data.settings);
         input.value='';
+
         sheetData=[];
         paintIdentity();
         if(typeof loadSettings==='function')loadSettings();
@@ -90,13 +98,17 @@
         if(typeof renderAll==='function')renderAll();
 
         feedback.className='admin-credential-feedback success';
-        feedback.textContent=`Perfil alterado para ${data.profileName}. Sincronizando a planilha...`;
-        if(typeof toast==='function')toast(`Perfil alterado para ${data.profileName}.`);
+        feedback.textContent=`Perfil alterado para ${data.profileName}. Buscando ${data.settings.sheetName}...`;
+        if(typeof toast==='function')toast(`Agora: ${data.profileName}.`);
 
         await sync();
         paintIdentity();
         if(typeof renderAll==='function')renderAll();
-        feedback.textContent=`Credenciado como ${data.profileName}. Planilha e aba atualizadas.`;
+
+        const live=typeof cfg==='function'?cfg():data.settings;
+        if(live.profile!==data.profile)throw new Error('O perfil mudou no servidor, mas a interface não aplicou o novo estado.');
+        feedback.className='admin-credential-feedback success';
+        feedback.textContent=`Credenciado como ${data.profileName} • aba ${data.settings.sheetName}`;
       }catch(error){
         console.error('Falha ao alternar perfil',error);
         feedback.className='admin-credential-feedback error';
