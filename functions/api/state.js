@@ -21,6 +21,12 @@ function json(data, status = 200) {
   });
 }
 
+function validWriteOrigin(request) {
+  const origin = request.headers.get("Origin");
+  if (!origin) return true;
+  return origin === new URL(request.url).origin;
+}
+
 export async function onRequestGet(context) {
   try {
     await ensureDatabase(context.env.DB);
@@ -50,12 +56,14 @@ export async function onRequestGet(context) {
 
 export async function onRequestPut(context) {
   try {
+    if (!validWriteOrigin(context.request)) return json({ ok: false, error: "Origem não permitida" }, 403);
     await ensureDatabase(context.env.DB);
     const body = await context.request.json();
     const key = String(body?.key || "");
     if (!ALLOWED_KEYS.has(key)) return json({ ok: false, error: "Chave inválida" }, 400);
 
     const value = JSON.stringify(body?.value ?? null);
+    if (value.length > 2_000_000) return json({ ok: false, error: "Payload muito grande" }, 413);
     const updatedAt = new Date().toISOString();
 
     await context.env.DB.prepare(`
