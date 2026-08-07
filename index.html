@@ -18,7 +18,7 @@
 <aside class="sidebar">
   <div class="brand">
     <div class="brandmark"><i data-lucide="sparkles"></i></div>
-    <div class="brandtext"><b>Ana Sales</b><span>Central de vendas</span></div>
+    <div class="brandtext"><b>Ana</b><span>Central de vendas</span></div>
   </div>
   <div class="navlabel">Visão geral</div>
   <nav class="nav">
@@ -33,7 +33,7 @@
     <button data-view="audit"><i data-lucide="history"></i><span>Atividades</span></button>
     <button data-view="settings"><i data-lucide="settings-2"></i><span>Configurações</span></button>
   </nav>
-  <div class="sidefooter">Google Sheets + lançamentos locais<br>Sincronização inteligente</div>
+  <div class="sidefooter">Google Sheets + banco online<br>Sincronização inteligente</div>
 </aside>
 
 <main class="main">
@@ -64,193 +64,37 @@
     </div>
     <div id="sourceCaption" class="source-caption">Planilha e lançamentos manuais estão somados em todos os indicadores abaixo.</div>
     <div class="kpis">
-      <article class="card kpi">
-        <div class="kpi-head"><span>Vendido no mês</span><span class="kpi-icon"><i data-lucide="badge-dollar-sign"></i></span></div>
-        <div id="kpiSales" class="kpi-value">R$ 0,00</div><div id="kpiSalesHint" class="kpi-hint">Planilha + lançamentos manuais</div>
-      </article>
-      <article class="card kpi">
-        <div class="kpi-head"><span>Pedidos pagos</span><span class="kpi-icon"><i data-lucide="shopping-cart"></i></span></div>
-        <div id="kpiOrders" class="kpi-value">0</div><div id="kpiOrdersHint" class="kpi-hint">0 clientes únicos</div>
-      </article>
-      <article class="card kpi commission">
-        <div class="kpi-head"><span>Comissão atual</span><span class="kpi-icon"><i data-lucide="hand-coins"></i></span></div>
-        <div id="kpiCommission" class="kpi-value">R$ 0,00</div><div id="kpiCommissionHint" class="kpi-hint">3% desde a primeira venda</div>
-      </article>
-      <article class="card kpi">
-        <div class="kpi-head"><span>Projeção do mês</span><span class="kpi-icon"><i data-lucide="trending-up"></i></span></div>
-        <div id="kpiProjection" class="kpi-value">R$ 0,00</div><div id="kpiProjectionHint" class="kpi-hint">Estimativa pelo ritmo atual</div>
-      </article>
+      <article class="card kpi"><div class="kpi-head"><span>Vendido no mês</span><span class="kpi-icon"><i data-lucide="badge-dollar-sign"></i></span></div><div id="kpiSales" class="kpi-value">R$ 0,00</div><div id="kpiSalesHint" class="kpi-hint">Planilha + lançamentos manuais</div></article>
+      <article class="card kpi"><div class="kpi-head"><span>Pedidos pagos</span><span class="kpi-icon"><i data-lucide="shopping-cart"></i></span></div><div id="kpiOrders" class="kpi-value">0</div><div id="kpiOrdersHint" class="kpi-hint">0 clientes únicos</div></article>
+      <article class="card kpi commission"><div class="kpi-head"><span>Comissão atual</span><span class="kpi-icon"><i data-lucide="hand-coins"></i></span></div><div id="kpiCommission" class="kpi-value">R$ 0,00</div><div id="kpiCommissionHint" class="kpi-hint">3% desde a primeira venda</div></article>
+      <article class="card kpi"><div class="kpi-head"><span>Projeção do mês</span><span class="kpi-icon"><i data-lucide="trending-up"></i></span></div><div id="kpiProjection" class="kpi-value">R$ 0,00</div><div id="kpiProjectionHint" class="kpi-hint">Estimativa pelo ritmo atual</div></article>
     </div>
-
     <div class="row2">
-      <article class="card pad">
-        <div class="cardhead"><h2>Desempenho do mês</h2><span id="daysLeft">—</span></div>
-        <div class="goal-top">
-          <div><div class="goal-label">Total vendido</div><div id="goalCurrent" class="goal-value">R$ 0,00</div></div>
-          <div class="commission-pill"><small>COMISSÃO ATUAL</small><b id="goalCommission">R$ 0,00</b></div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-labels"><span>R$ 0</span><span>60k • 3,5%</span><span>80k • 4%</span></div>
-          <div class="progress"><i id="goalBar"></i></div>
-        </div>
-        <div class="goal-micro">
-          <div class="micro"><small>Média vendida / dia</small><b id="avgDay">R$ 0,00</b></div>
-          <div class="micro"><small>Falta para 3,5%</small><b id="nextGap">R$ 0,00</b></div>
-          <div class="micro"><small>A receber de clientes</small><b id="pendingTotal">R$ 0,00</b></div>
-        </div>
-        <div class="tiers">
-          <div id="tier3" class="tier active"><b>3% de comissão</b><span>de R$ 0 até R$ 59.999,99</span></div>
-          <div id="tier35" class="tier"><b>3,5% de comissão</b><span>de R$ 60 mil até R$ 79.999,99</span></div>
-          <div id="tier4" class="tier"><b>4% de comissão</b><span>a partir de R$ 80 mil</span></div>
-        </div>
-      </article>
-      <article class="card pad">
-        <div class="cardhead"><h2>Status dos pedidos</h2><span id="statusTotal">0 pedidos</span></div>
-        <div id="statusGrid" class="statuses"></div>
-      </article>
+      <article class="card pad"><div class="cardhead"><h2>Desempenho do mês</h2><span id="daysLeft">—</span></div><div class="goal-top"><div><div class="goal-label">Total vendido</div><div id="goalCurrent" class="goal-value">R$ 0,00</div></div><div class="commission-pill"><small>COMISSÃO ATUAL</small><b id="goalCommission">R$ 0,00</b></div></div><div class="progress-wrap"><div class="progress-labels"><span>R$ 0</span><span>60k • 3,5%</span><span>80k • 4%</span></div><div class="progress"><i id="goalBar"></i></div></div><div class="goal-micro"><div class="micro"><small>Média vendida / dia</small><b id="avgDay">R$ 0,00</b></div><div class="micro"><small>Falta para 3,5%</small><b id="nextGap">R$ 0,00</b></div><div class="micro"><small>A receber de clientes</small><b id="pendingTotal">R$ 0,00</b></div></div><div class="tiers"><div id="tier3" class="tier active"><b>3% de comissão</b><span>de R$ 0 até R$ 59.999,99</span></div><div id="tier35" class="tier"><b>3,5% de comissão</b><span>de R$ 60 mil até R$ 79.999,99</span></div><div id="tier4" class="tier"><b>4% de comissão</b><span>a partir de R$ 80 mil</span></div></div></article>
+      <article class="card pad"><div class="cardhead"><h2>Status dos pedidos</h2><span id="statusTotal">0 pedidos</span></div><div id="statusGrid" class="statuses"></div></article>
     </div>
-
-    <div class="row2">
-      <article class="card pad chart-card">
-        <div class="cardhead"><h2>Vendas por dia</h2><span id="bestDay">—</span></div>
-        <canvas id="salesChart" width="900" height="300"></canvas>
-      </article>
-      <article class="card pad">
-        <div class="cardhead"><h2>Melhores clientes</h2><span>mês selecionado</span></div>
-        <div id="topClients" class="rank"></div>
-      </article>
-    </div>
-
-    <article class="card pad" style="margin-top:12px">
-      <div class="cardhead"><h2>Precisa de atenção</h2><span id="attentionCount">0 itens</span></div>
-      <div id="attentionList" class="attention"></div>
-    </article>
+    <div class="row2"><article class="card pad chart-card"><div class="cardhead"><h2>Vendas por dia</h2><span id="bestDay">—</span></div><canvas id="salesChart" width="900" height="300"></canvas></article><article class="card pad"><div class="cardhead"><h2>Melhores clientes</h2><span>mês selecionado</span></div><div id="topClients" class="rank"></div></article></div>
+    <article class="card pad" style="margin-top:12px"><div class="cardhead"><h2>Precisa de atenção</h2><span id="attentionCount">0 itens</span></div><div id="attentionList" class="attention"></div></article>
   </section>
 
-  <section id="orders" class="view">
-    <div class="sectionintro"><div><h2>Pedidos</h2><p>Todos os pedidos pagos do mês, somando Google Sheets e lançamentos manuais.</p></div></div>
-    <article class="card pad">
-      <div class="toolbar">
-        <input id="orderSearch" class="input search" placeholder="Buscar cliente, pedido, telefone, CPF/CNPJ ou e-mail">
-        <select id="sourceFilter" class="select"><option value="">Todas as origens</option><option value="sheet">Planilha</option><option value="manual">Manual</option></select>
-        <select id="statusFilter" class="select"><option value="">Todos os status</option></select>
-      </div>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Pedido</th><th>Cliente</th><th>Origem</th><th>Valor pago</th><th>Pagamento</th><th>Status</th><th>Forma</th><th>Data</th><th></th></tr></thead>
-        <tbody id="ordersBody"></tbody>
-      </table></div>
-    </article>
-  </section>
+  <section id="orders" class="view"><div class="sectionintro"><div><h2>Pedidos</h2><p>Todos os pedidos pagos do mês, somando Google Sheets e lançamentos manuais.</p></div></div><article class="card pad"><div class="toolbar"><input id="orderSearch" class="input search" placeholder="Buscar cliente, pedido, telefone, CPF/CNPJ ou e-mail"><select id="sourceFilter" class="select"><option value="">Todas as origens</option><option value="sheet">Planilha</option><option value="manual">Manual</option></select><select id="statusFilter" class="select"><option value="">Todos os status</option></select></div><div class="tablewrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Origem</th><th>Valor pago</th><th>Pagamento</th><th>Status</th><th>Forma</th><th>Data</th><th></th></tr></thead><tbody id="ordersBody"></tbody></table></div></article></section>
 
-  <section id="manual" class="view">
-    <div class="sectionintro"><div><h2>Novo lançamento</h2><p>Para contabilizar uma venda, só são obrigatórios <b>cliente</b>, <b>valor pago</b> e <b>forma de pagamento</b>. O restante pode ser preenchido quando fizer sentido.</p></div></div>
-    <div class="split">
-      <article class="card pad formcard">
-        <div class="cardhead"><h2>Registrar pedido pago</h2><span>entra imediatamente nos cálculos</span></div>
-        <div id="manualEditNote" class="editing-note">Editando lançamento existente. Ao salvar, os dados anteriores serão atualizados.</div>
-        <form id="manualForm" class="formgrid">
-          <input type="hidden" name="editId" value="">
-          <div><label>Nome do cliente <span class="req">*</span></label><input name="name" class="input" required placeholder="Ex.: Maria Silva"></div>
-          <div><label>Valor pago <span class="req">*</span></label><input name="value" class="input" required inputmode="decimal" placeholder="Ex.: 350,00"></div>
-          <div><label>Forma de pagamento <span class="req">*</span></label>
-            <select name="method" class="select" required><option value="">Selecione</option><option>PIX</option><option>DINHEIRO</option><option>CARTÃO DE CRÉDITO</option><option>CARTÃO DE DÉBITO</option><option>TRANSFERÊNCIA</option><option>OUTRO</option></select>
-          </div>
-          <div><label>Data do pagamento</label><input name="date" class="input" type="date"></div>
-          <div><label>ID / Nº do pedido</label><input name="orderId" class="input" placeholder="Opcional"></div>
-          <div><label>Status do pedido</label><select name="status" class="select"><option value="">Sem status</option><option>Arte</option><option>Impressão</option><option>Corte</option><option>Costura</option><option>Produção</option><option>Pronto</option><option>Entregue/Retirado</option></select></div>
-          <div><label>Telefone</label><input name="phone" class="input" placeholder="Opcional"></div>
-          <div><label>CPF / CNPJ</label><input name="document" class="input" placeholder="Opcional"></div>
-          <div><label>E-mail</label><input name="email" type="email" class="input" placeholder="Opcional"></div>
-          <div><label>Previsão de entrega</label><input name="due" type="date" class="input"></div>
-          <div class="full"><label>Descrição / observações</label><textarea name="description" placeholder="Detalhes do pedido, combinação com cliente, itens, medidas etc."></textarea></div>
-          <div class="full form-actions">
-            <button id="manualSubmitBtn" class="btn purple" type="submit"><i data-lucide="plus"></i><span>Lançar venda</span></button>
-            <button id="manualCancelEdit" class="btn" type="button" style="display:none"><i data-lucide="x"></i>Cancelar edição</button>
-          </div>
-        </form>
-      </article>
-      <article class="card pad">
-        <div class="cardhead"><h2>Últimos lançamentos manuais</h2><span id="manualCount">0 lançamentos</span></div>
-        <div id="manualList"></div>
-      </article>
-    </div>
-  </section>
+  <section id="manual" class="view"><div class="sectionintro"><div><h2>Novo lançamento</h2><p>Para contabilizar uma venda, só são obrigatórios <b>cliente</b>, <b>valor pago</b> e <b>forma de pagamento</b>. O restante pode ser preenchido quando fizer sentido.</p></div></div><div class="split"><article class="card pad formcard"><div class="cardhead"><h2>Registrar pedido pago</h2><span>entra imediatamente nos cálculos</span></div><div id="manualEditNote" class="editing-note">Editando lançamento existente. Ao salvar, os dados anteriores serão atualizados.</div><form id="manualForm" class="formgrid"><input type="hidden" name="editId" value=""><div><label>Nome do cliente <span class="req">*</span></label><input name="name" class="input" required placeholder="Ex.: Maria Silva"></div><div><label>Valor pago <span class="req">*</span></label><input name="value" class="input" required inputmode="decimal" placeholder="Ex.: 350,00"></div><div><label>Forma de pagamento <span class="req">*</span></label><select name="method" class="select" required><option value="">Selecione</option><option>PIX</option><option>DINHEIRO</option><option>CARTÃO DE CRÉDITO</option><option>CARTÃO DE DÉBITO</option><option>TRANSFERÊNCIA</option><option>OUTRO</option></select></div><div><label>Data do pagamento</label><input name="date" class="input" type="date"></div><div><label>ID / Nº do pedido</label><input name="orderId" class="input" placeholder="Opcional"></div><div><label>Status do pedido</label><select name="status" class="select"><option value="">Sem status</option><option>Arte</option><option>Impressão</option><option>Corte</option><option>Costura</option><option>Produção</option><option>Pronto</option><option>Entregue/Retirado</option></select></div><div><label>Telefone</label><input name="phone" class="input" placeholder="Opcional"></div><div><label>CPF / CNPJ</label><input name="document" class="input" placeholder="Opcional"></div><div><label>E-mail</label><input name="email" type="email" class="input" placeholder="Opcional"></div><div><label>Previsão de entrega</label><input name="due" type="date" class="input"></div><div class="full"><label>Descrição / observações</label><textarea name="description" placeholder="Detalhes do pedido, combinação com cliente, itens, medidas etc."></textarea></div><div class="full form-actions"><button id="manualSubmitBtn" class="btn purple" type="submit"><i data-lucide="plus"></i><span>Lançar venda</span></button><button id="manualCancelEdit" class="btn" type="button" style="display:none"><i data-lucide="x"></i>Cancelar edição</button></div></form></article><article class="card pad"><div class="cardhead"><h2>Últimos lançamentos manuais</h2><span id="manualCount">0 lançamentos</span></div><div id="manualList"></div></article></div></section>
 
-  <section id="pending" class="view">
-    <div class="sectionintro"><div><h2>Clientes a receber</h2><p>Cadastre quem ainda não pagou. Quando receber, clique em <b>Marcar como pago</b>: o registro sai daqui e vira automaticamente um lançamento manual pago.</p></div></div>
-    <div class="split">
-      <article class="card pending-card">
-        <div class="cardhead"><h2>Novo valor a receber</h2><span>não entra nas vendas ainda</span></div>
-        <div id="pendingEditNote" class="editing-note">Editando valor em aberto.</div>
-        <form id="pendingForm" class="formgrid">
-          <input type="hidden" name="editId" value="">
-          <div><label>Nome do cliente <span class="req">*</span></label><input name="name" class="input" required></div>
-          <div><label>Valor esperado <span class="req">*</span></label><input name="value" class="input" required inputmode="decimal" placeholder="Ex.: 450,00"></div>
-          <div><label>Forma prevista</label><select name="method" class="select"><option value="">Não informado</option><option>PIX</option><option>DINHEIRO</option><option>CARTÃO DE CRÉDITO</option><option>CARTÃO DE DÉBITO</option><option>TRANSFERÊNCIA</option><option>OUTRO</option></select></div>
-          <div><label>Prazo / data esperada</label><input name="due" class="input" type="date"></div>
-          <div class="full"><label>Observação</label><textarea name="note" placeholder="Ex.: aguarda pagamento da segunda parcela"></textarea></div>
-          <div class="full form-actions">
-            <button id="pendingSubmitBtn" class="btn purple" type="submit"><i data-lucide="wallet-cards"></i><span>Adicionar a receber</span></button>
-            <button id="pendingCancelEdit" class="btn" type="button" style="display:none"><i data-lucide="x"></i>Cancelar edição</button>
-          </div>
-        </form>
-      </article>
-      <article class="card pending-card">
-        <div class="cardhead"><h2>Em aberto</h2><span id="pendingHeader">R$ 0,00</span></div>
-        <div id="pendingList" class="pending-list"></div>
-      </article>
-    </div>
-  </section>
+  <section id="pending" class="view"><div class="sectionintro"><div><h2>Clientes a receber</h2><p>Cadastre quem ainda não pagou. Quando receber, clique em <b>Marcar como pago</b>: o registro sai daqui e vira automaticamente um lançamento manual pago.</p></div></div><div class="split"><article class="card pending-card"><div class="cardhead"><h2>Novo valor a receber</h2><span>não entra nas vendas ainda</span></div><div id="pendingEditNote" class="editing-note">Editando valor em aberto.</div><form id="pendingForm" class="formgrid"><input type="hidden" name="editId" value=""><div><label>Nome do cliente <span class="req">*</span></label><input name="name" class="input" required></div><div><label>Valor esperado <span class="req">*</span></label><input name="value" class="input" required inputmode="decimal" placeholder="Ex.: 450,00"></div><div><label>Forma prevista</label><select name="method" class="select"><option value="">Não informado</option><option>PIX</option><option>DINHEIRO</option><option>CARTÃO DE CRÉDITO</option><option>CARTÃO DE DÉBITO</option><option>TRANSFERÊNCIA</option><option>OUTRO</option></select></div><div><label>Prazo / data esperada</label><input name="due" class="input" type="date"></div><div class="full"><label>Observação</label><textarea name="note" placeholder="Ex.: aguarda pagamento da segunda parcela"></textarea></div><div class="full form-actions"><button id="pendingSubmitBtn" class="btn purple" type="submit"><i data-lucide="wallet-cards"></i><span>Adicionar a receber</span></button><button id="pendingCancelEdit" class="btn" type="button" style="display:none"><i data-lucide="x"></i>Cancelar edição</button></div></form></article><article class="card pending-card"><div class="cardhead"><h2>Em aberto</h2><span id="pendingHeader">R$ 0,00</span></div><div id="pendingList" class="pending-list"></div></article></div></section>
 
-  <section id="clients" class="view">
-    <div class="sectionintro"><div><h2>Clientes</h2><p>Ranking consolidado de clientes pagos no período selecionado.</p></div></div>
-    <article class="card pad">
-      <div class="toolbar"><input id="clientSearch" class="input search" placeholder="Buscar cliente"></div>
-      <div class="tablewrap"><table style="min-width:720px">
-        <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total pago</th><th>Ticket médio</th><th>Última compra</th></tr></thead>
-        <tbody id="clientsBody"></tbody>
-      </table></div>
-    </article>
-  </section>
+  <section id="clients" class="view"><div class="sectionintro"><div><h2>Clientes</h2><p>Ranking consolidado de clientes pagos no período selecionado.</p></div></div><article class="card pad"><div class="toolbar"><input id="clientSearch" class="input search" placeholder="Buscar cliente"></div><div class="tablewrap"><table style="min-width:720px"><thead><tr><th>Cliente</th><th>Pedidos</th><th>Total pago</th><th>Ticket médio</th><th>Última compra</th></tr></thead><tbody id="clientsBody"></tbody></table></div></article></section>
 
-  <section id="audit" class="view">
-    <div class="sectionintro"><div><h2>Atividades</h2><p>Alterações detectadas na planilha e operações feitas dentro deste painel.</p></div></div>
-    <article class="card pad"><div id="auditList"></div></article>
-  </section>
+  <section id="audit" class="view"><div class="sectionintro"><div><h2>Atividades</h2><p>Alterações detectadas na planilha e operações feitas dentro deste painel.</p></div></div><article class="card pad"><div id="auditList"></div></article></section>
 
-  <section id="settings" class="view">
-    <div class="sectionintro"><div><h2>Configurações</h2><p>Fonte da Google Sheets, atualização e regras de comissão.</p></div></div>
-    <article class="card pad">
-      <div class="settingsgrid">
-        <div><label>Link da planilha</label><input id="sheetUrlInput" class="input"></div>
-        <div><label>Aba</label><input id="sheetNameInput" class="input"></div>
-        <div><label>Atualização automática</label><select id="refreshInterval" class="select"><option value="30">30 segundos</option><option value="60">1 minuto</option><option value="120">2 minutos</option><option value="300">5 minutos</option><option value="0">Desativada</option></select></div>
-        <div><label>Faixa 3,5% a partir de</label><input id="goal60" class="input" type="number"></div>
-        <div><label>Faixa 4% a partir de</label><input id="goal80" class="input" type="number"></div>
-      </div>
-      <div style="margin-top:14px"><button id="saveSettings" class="btn primary"><i data-lucide="save"></i>Salvar configurações</button></div>
-      <div style="height:1px;background:var(--line);margin:20px 0"></div>
-      <div class="cardhead"><h2>Endpoint utilizado</h2><span>leitura CSV da aba</span></div>
-      <div id="csvEndpoint" class="code"></div>
-      <p class="muted" style="line-height:1.6;margin-top:11px">A planilha deve estar disponível para leitura por link ou publicada na Web. Lançamentos manuais, clientes a receber, notas e atividades são armazenados neste navegador nesta versão.</p>
-    </article>
-  </section>
+  <section id="settings" class="view"><div class="sectionintro"><div><h2>Configurações</h2><p>Fonte da Google Sheets, atualização e regras de comissão.</p></div></div><article class="card pad"><div class="settingsgrid"><div><label>Link da planilha</label><input id="sheetUrlInput" class="input"></div><div><label>Aba</label><input id="sheetNameInput" class="input"></div><div><label>Atualização automática</label><select id="refreshInterval" class="select"><option value="30">30 segundos</option><option value="60">1 minuto</option><option value="120">2 minutos</option><option value="300">5 minutos</option><option value="0">Desativada</option></select></div><div><label>Faixa 3,5% a partir de</label><input id="goal60" class="input" type="number"></div><div><label>Faixa 4% a partir de</label><input id="goal80" class="input" type="number"></div></div><div style="margin-top:14px"><button id="saveSettings" class="btn primary"><i data-lucide="save"></i>Salvar configurações</button></div><div style="height:1px;background:var(--line);margin:20px 0"></div><div class="cardhead"><h2>Endpoint utilizado</h2><span>leitura CSV da aba</span></div><div id="csvEndpoint" class="code"></div><p class="muted" style="line-height:1.6;margin-top:11px">A planilha deve estar disponível para leitura por link ou publicada na Web.</p></article></section>
 </main>
 </div>
 
 <div id="drawerBack" class="drawerback"></div>
-<aside id="drawer" class="drawer">
-  <button id="drawerClose" class="drawerclose"><i data-lucide="x"></i></button>
-  <h2 id="drawerTitle">Pedido</h2><div id="drawerSub" class="muted"></div>
-  <div id="drawerDetails" class="detailgrid"></div>
-  <div class="cardhead" style="margin-top:4px"><h2>Anotações</h2><span>salvas neste navegador</span></div>
-  <div id="noteList" class="notes"></div>
-  <textarea id="noteText" placeholder="Escreva uma anotação sobre este pedido"></textarea>
-  <button id="addNote" class="btn purple" style="margin-top:8px"><i data-lucide="message-square-plus"></i>Adicionar anotação</button>
-</aside>
+<aside id="drawer" class="drawer"><button id="drawerClose" class="drawerclose"><i data-lucide="x"></i></button><h2 id="drawerTitle">Pedido</h2><div id="drawerSub" class="muted"></div><div id="drawerDetails" class="detailgrid"></div><div class="cardhead" style="margin-top:4px"><h2>Anotações</h2><span>salvas online</span></div><div id="noteList" class="notes"></div><textarea id="noteText" placeholder="Escreva uma anotação sobre este pedido"></textarea><button id="addNote" class="btn purple" style="margin-top:8px"><i data-lucide="message-square-plus"></i>Adicionar anotação</button></aside>
 <div id="toast" class="toast"></div>
-
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script src="./app.js"></script>
+<script src="./app.js?v=20260807-1555"></script>
 </body>
 </html>
