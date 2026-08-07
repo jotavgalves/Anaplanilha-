@@ -57,20 +57,28 @@ async function toggleProfile(db, body) {
   const settingsRow = await db.prepare("SELECT value FROM app_state WHERE key='settings'").first();
   const currentSettings = parseJson(settingsRow?.value, {});
   const currentKey = currentSettings.profile === "dayane" ? "dayane" : "ana";
-  const next = currentKey === "ana" ? PROFILES.dayane : PROFILES.ana;
+
+  const requested = String(body?.targetProfile || "").toLowerCase();
+  const nextKey = requested === "ana" || requested === "dayane"
+    ? requested
+    : (currentKey === "ana" ? "dayane" : "ana");
+  const next = PROFILES[nextKey];
   const settings = { ...currentSettings, ...next };
   const now = new Date().toISOString();
 
   const auditRow = await db.prepare("SELECT value FROM app_state WHERE key='audit'").first();
   let audit = parseJson(auditRow?.value, []);
   if (!Array.isArray(audit)) audit = [];
-  audit.unshift({
-    time: now,
-    type: "manual",
-    source: "system",
-    msg: `Perfil administrativo alterado de ${currentKey === "ana" ? "Ana" : "Dayane"} para ${next.profileName}.`
-  });
-  audit = audit.slice(0, 2000);
+
+  if (currentKey !== nextKey) {
+    audit.unshift({
+      time: now,
+      type: "manual",
+      source: "system",
+      msg: `Perfil administrativo alterado de ${currentKey === "ana" ? "Ana" : "Dayane"} para ${next.profileName}.`
+    });
+    audit = audit.slice(0, 2000);
+  }
 
   await db.batch([
     db.prepare(`
