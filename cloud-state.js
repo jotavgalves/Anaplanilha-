@@ -62,10 +62,29 @@ function clearLegacyLocalState() {
   [K.manual,K.pending,K.notes,K.audit,K.settings,K.snapshot,K.cache,"ana_v4_dashboard_source"].forEach(k=>localStorage.removeItem(k));
 }
 
+function sanitizeAdminResidue(settings){
+  const next=Object.assign({},settings||{});
+  const hadAdminKeys=['profile','profileName','sellerName'].some(key=>Object.prototype.hasOwnProperty.call(next,key));
+  const dayaneSheet=String(next.sheetUrl||'').includes('1yuR43gP2_kPMZpySYeiyJIJXRwGchvosa31fhigVoMw');
+  const dayaneTab=String(next.sheetName||'').trim()==='VENNDA DO MÊS';
+  if(!hadAdminKeys&&!dayaneSheet&&!dayaneTab)return {changed:false,value:next};
+  delete next.profile;delete next.profileName;delete next.sellerName;
+  if(dayaneSheet||dayaneTab){
+    next.sheetUrl=DEFAULT_SHEET_URL;
+    next.sheetName=DEFAULT_SHEET_NAME;
+  }
+  return {changed:true,value:next};
+}
+
 async function loadCloudState() {
   try {
     const data = await cloudRequest("GET");
     const remoteState = Object.assign(structuredClone(CLOUD_DEFAULTS), data.state || {});
+    const cleaned=sanitizeAdminResidue(remoteState.settings);
+    if(cleaned.changed){
+      remoteState.settings=cleaned.value;
+      try{await cloudRequest("PUT","settings",cleaned.value)}catch(error){console.warn("Não foi possível remover o resíduo do perfil administrativo do D1",error)}
+    }
     cloudState = remoteState;
     cloudOnline = true;
 
