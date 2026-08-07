@@ -1,9 +1,4 @@
 (()=>{
-  const css=document.createElement("link");
-  css.rel="stylesheet";
-  css.href="./mobile.css";
-  document.head.appendChild(css);
-
   const loadScript=src=>new Promise((resolve,reject)=>{
     const s=document.createElement("script");
     s.src=src;
