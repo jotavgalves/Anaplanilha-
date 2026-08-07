@@ -131,7 +131,8 @@
       </select>
       <input id="activityFrom" class="input" type="date" aria-label="Data inicial">
       <input id="activityTo" class="input" type="date" aria-label="Data final">
-      <button id="activityClear" type="button" class="btn"><i data-lucide="filter-x"></i>Limpar</button>
+      <button id="activityClear" type="button" class="btn"><i data-lucide="filter-x"></i>Limpar filtros</button>
+      <button id="activityReset" type="button" class="btn"><i data-lucide="rotate-ccw"></i>Reiniciar histórico</button>
       <span id="activityCount" class="activity-count"></span>`;
     list.parentElement.insertBefore(box,list);
     ['activitySearch','activityType','activitySource','activityFrom','activityTo'].forEach(id=>document.querySelector('#'+id).addEventListener(id==='activitySearch'?'input':'change',()=>renderAudit()));
@@ -139,7 +140,34 @@
       ['activitySearch','activityType','activitySource','activityFrom','activityTo'].forEach(id=>document.querySelector('#'+id).value='');
       renderAudit();
     };
+    document.querySelector('#activityReset').onclick=resetActivityHistory;
     if(window.lucide)lucide.createIcons({attrs:{'stroke-width':1.9}});
+  }
+
+  async function statePut(key,value){
+    const res=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,value}),cache:'no-store'});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.ok)throw new Error(data.error||`HTTP ${res.status}`);
+    return data;
+  }
+
+  async function resetActivityHistory(){
+    const ok=window.confirm('Reiniciar o histórico de atividades?\n\nIsso apaga somente Atividades e a linha de base da auditoria. Vendas, lançamentos, A receber, anotações e metas não serão apagados.');
+    if(!ok)return;
+    const button=document.querySelector('#activityReset');
+    if(button){button.disabled=true;button.textContent='Reiniciando...';}
+    try{
+      await statePut('audit',[]);
+      await statePut('snapshot',{});
+      activityData=[];
+      if(typeof toast==='function')toast('Histórico reiniciado. Criando nova linha de base da planilha.');
+      const url=new URL(window.location.href);url.searchParams.set('_auditReset',Date.now().toString());
+      setTimeout(()=>window.location.replace(url.toString()),300);
+    }catch(error){
+      console.error('Falha ao reiniciar histórico',error);
+      if(typeof toast==='function')toast('Não consegui reiniciar o histórico.');
+      if(button){button.disabled=false;button.innerHTML='<i data-lucide="rotate-ccw"></i>Reiniciar histórico';if(window.lucide)lucide.createIcons();}
+    }
   }
 
   function filteredActivities(){
