@@ -1,0 +1,99 @@
+/* Ana Sales mobile v2 — native, compact and touch-first */
+@media (max-width:760px){
+  :root{--mobile-x:14px}
+  html{-webkit-text-size-adjust:100%;scroll-padding-top:18px;scroll-padding-bottom:120px}
+  body{padding-bottom:calc(108px + env(safe-area-inset-bottom));background:#090c12}
+  .main{padding:calc(16px + env(safe-area-inset-top)) var(--mobile-x) 42px}
+
+  /* Header clear of the iPhone status bar */
+  .topbar{margin-bottom:16px}
+  .hello{margin-bottom:13px}
+  .hello h1{font-size:28px;line-height:1.02;letter-spacing:-.045em;margin:0}
+  .hello p{font-size:11.5px;line-height:1.35;margin-top:6px}
+  .topactions{grid-template-columns:minmax(0,1fr) 46px 46px 46px;gap:7px}
+  .topactions .select,.topactions .btn{height:46px;min-height:46px;border-radius:13px}
+
+  /* Bottom navigation slimmer and less intrusive */
+  .sidebar{left:9px;right:9px;bottom:calc(7px + env(safe-area-inset-bottom));height:66px;padding:5px;border-radius:20px;background:#10151d;border-color:#283140}
+  .sidebar .nav:first-of-type button{height:54px;border-radius:14px;gap:3px;font-size:8.7px}
+  .sidebar .nav:first-of-type button svg{width:19px;height:19px}
+  body.keyboard-open .sidebar{transform:translateY(120%);opacity:0;pointer-events:none;transition:transform .16s ease,opacity .16s ease}
+
+  /* Source selector must always be tappable */
+  .source-shell{position:relative;z-index:2;padding:12px;margin-bottom:7px}
+  .source-switch{position:relative;z-index:3;pointer-events:auto!important;touch-action:manipulation;gap:3px;padding:3px}
+  .source-switch button{position:relative;z-index:4;pointer-events:auto!important;touch-action:manipulation;min-height:40px;padding:6px 4px;font-size:9px;border-radius:8px;user-select:none;-webkit-user-select:none}
+  .source-switch button.active{background:#202633;color:#fff;box-shadow:inset 0 0 0 1px rgba(167,139,250,.34)}
+
+  /* Cards */
+  .kpis{gap:8px}
+  .kpi{min-height:122px;padding:14px;border-radius:16px}
+  .kpi-head{font-size:8.9px}.kpi-icon{width:29px;height:29px}.kpi-icon svg{width:15px;height:15px}
+  .kpi-value{font-size:clamp(20px,5.6vw,25px);margin-top:11px}.kpi-hint{font-size:9px;margin-top:5px}
+  .card,.source-shell{box-shadow:none!important}
+  .pad,.pending-card{padding:14px}
+  .cardhead{margin-bottom:13px}.cardhead h2{font-size:14.5px}.cardhead span{font-size:9px}
+  .sectionintro{margin-bottom:11px}.sectionintro h2{font-size:21px;line-height:1.08}.sectionintro p{font-size:10.5px;line-height:1.45;margin-top:5px}
+
+  /* Forms: stop iOS controls escaping their container */
+  .formgrid{gap:10px}
+  .formgrid>div,.settingsgrid>div{min-width:0;max-width:100%}
+  .formgrid input,.formgrid select,.formgrid textarea,.settingsgrid input,.settingsgrid select{display:block;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+  label{font-size:10px;line-height:1.2;margin-bottom:6px;color:#929cad}
+  .input,.select,textarea{
+    width:100%;max-width:100%;border:1px solid #30394a;background:#10151d;color:#eef1f6;
+    border-radius:13px;box-shadow:none!important;font-size:16px;
+  }
+  .input,.select{height:50px;min-height:50px;padding:0 14px}
+  textarea{min-height:94px;padding:13px 14px;line-height:1.4}
+  .input::placeholder,textarea::placeholder{color:#606b7e;opacity:1}
+  .input:focus,.select:focus,textarea:focus{border-color:#8061db;box-shadow:0 0 0 3px rgba(139,92,246,.10)!important}
+  input,select,textarea{scroll-margin-top:96px;scroll-margin-bottom:118px}
+
+  /* Replace ugly native select treatment */
+  select.select,.formgrid select,.settingsgrid select{
+    -webkit-appearance:none;appearance:none;
+    background-color:#10151d;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%239aa4b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;background-size:17px;padding-right:42px;
+  }
+
+  /* iOS date fields */
+  input[type='date']{
+    -webkit-appearance:none;appearance:none;display:block;width:100%!important;min-width:0!important;max-width:100%!important;
+    height:50px!important;line-height:50px!important;padding:0 14px!important;text-align:left!important;color:#eef1f6!important;
+    background:#10151d!important;border:1px solid #30394a!important;border-radius:13px!important;overflow:hidden;
+  }
+  input[type='date']::-webkit-date-and-time-value{text-align:left;margin:0;min-height:0}
+  input[type='date']::-webkit-calendar-picker-indicator{opacity:.7;filter:invert(.8);padding:4px;margin:0}
+
+  /* Optional details collapse keeps forms short */
+  .mobile-optional{display:block;margin-top:1px;border:1px solid #252e3b;border-radius:14px;background:#0e131a;overflow:hidden}
+  .mobile-optional>summary{list-style:none;min-height:48px;padding:0 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#c6ccd7;font-size:11.5px;font-weight:700;cursor:pointer;touch-action:manipulation}
+  .mobile-optional>summary::-webkit-details-marker{display:none}
+  .mobile-optional>summary:after{content:'+';width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#191f2a;color:#9f87ef;font-size:17px;font-weight:500}
+  .mobile-optional[open]>summary:after{content:'–'}
+  .mobile-optional-body{padding:2px 12px 12px;display:grid;gap:10px;border-top:1px solid #202735}
+  .mobile-optional-body>div:first-child{margin-top:10px}
+
+  .form-actions{gap:7px;margin-top:1px}.form-actions .btn{width:100%;height:49px;min-height:49px}
+
+  /* Pending */
+  .pending-item{padding:13px;border-radius:14px}.pending-actions{gap:7px}.pending-actions .btn{min-height:43px;font-size:11px}
+
+  /* More comfortable list cards */
+  .tablewrap tbody{gap:8px}.tablewrap tr{padding:12px;border-radius:14px}
+  #ordersBody td,#clientsBody td{font-size:11px}
+
+  /* Full screen drawer stays below safe area */
+  .drawer{padding:calc(16px + env(safe-area-inset-top)) 14px calc(94px + env(safe-area-inset-bottom))}
+
+  /* Menu */
+  .mobile-more-menu{top:calc(114px + env(safe-area-inset-top));right:12px;width:min(285px,calc(100vw - 24px))}
+}
+
+@media (max-width:390px){
+  .main{padding-left:12px;padding-right:12px}
+  .kpis{grid-template-columns:1fr 1fr}.kpi{min-height:116px;padding:12px}.kpi-value{font-size:21px}
+  .source-switch button{font-size:8.6px}
+}
