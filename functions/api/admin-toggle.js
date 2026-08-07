@@ -52,13 +52,43 @@ export async function onRequestPost({ request, env }) {
     const updated = { ...settings, ...next };
     const now = new Date().toISOString();
 
-    await env.DB.prepare(`
-      INSERT INTO app_state(key, value, updated_at)
-      VALUES('settings', ?1, ?2)
-      ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
-    `).bind(JSON.stringify(updated), now).run();
+    const auditRow = await env.DB.prepare("SELECT value FROM app_state WHERE key='audit'").first();
+    let audit = [];
+    try { audit = JSON.parse(auditRow?.value || '[]'); if (!Array.isArray(audit)) audit = []; } catch (_) {}
+    audit.unshift({
+      time: now,
+      type: 'manual',
+      source: 'system',
+      msg: `Perfil administrativo alterado de ${current === 'ana' ? 'Ana' : 'Dayane'} para ${next.profileName}.`
+    });
+    audit = audit.slice(0, 2000);
 
-    return json({ ok: true, profile: next.profile, profileName: next.profileName, sellerName: next.sellerName, settings: updated, updatedAt: now });
+    await env.DB.batch([
+      env.DB.prepare(`
+        INSERT INTO app_state(key, value, updated_at)
+        VALUES('settings', ?1, ?2)
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
+      `).bind(JSON.stringify(updated), now),
+      env.DB.prepare(`
+        INSERT INTO app_state(key, value, updated_at)
+        VALUES('snapshot', ?1, ?2)
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
+      `).bind(JSON.stringify({}), now),
+      env.DB.prepare(`
+        INSERT INTO app_state(key, value, updated_at)
+        VALUES('audit', ?1, ?2)
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
+      `).bind(JSON.stringify(audit), now)
+    ]);
+
+    return json({
+      ok: true,
+      profile: next.profile,
+      profileName: next.profileName,
+      sellerName: next.sellerName,
+      settings: updated,
+      updatedAt: now
+    });
   } catch (error) {
     return json({ ok: false, error: error.message || 'Erro ao alternar perfil' }, 503);
   }
