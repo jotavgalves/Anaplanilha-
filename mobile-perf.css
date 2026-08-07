@@ -1,0 +1,40 @@
+/* Performance overrides for mobile devices */
+@media (max-width:760px){
+  *{scroll-behavior:auto!important}
+  body{background:#090b10!important;-webkit-tap-highlight-color:transparent}
+  button,a,.btn,.link,.nav button{touch-action:manipulation}
+
+  .sidebar{
+    background:#11151d!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    box-shadow:0 10px 24px rgba(0,0,0,.30)!important;
+  }
+  .nav button.active{background:#211b31!important;box-shadow:none!important}
+  .card,.kpi,.tablewrap tr,.pending-item{box-shadow:none!important}
+  .kpi:after{display:none!important}
+  .drawerback{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(0,0,0,.72)!important}
+  .drawer{box-shadow:none!important;transition:right .14s ease!important}
+
+  /* Avoid expensive translucent/gradient painting on long scrolling surfaces */
+  .tablewrap tr,.pending-item,.rankrow,.status,.micro,.tier,.detail,.note{background:#12161e!important}
+
+  /* Larger, stable touch targets without animation cost */
+  .input,.select,.btn{min-height:46px!important}
+  input,select,textarea{font-size:16px!important}
+  .pending-actions .btn{min-height:46px!important}
+
+  /* Mobile lists render as simple cards */
+  .tablewrap{overflow:visible!important}
+  .tablewrap tr{contain:layout style paint}
+  .pending-item,.rankrow,.attrow{contain:layout style}
+
+  /* Keep canvas reasonable on small GPUs */
+  .chart-card canvas{height:190px!important}
+
+  /* No hover repaint loop on touch devices */
+  tr:hover td,.btn:hover{background:inherit}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
