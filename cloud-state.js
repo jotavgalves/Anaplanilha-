@@ -112,6 +112,12 @@ window.saveCloudSettings = function(patch){
   cloudState.settings = Object.assign({}, cloudState.settings || {}, patch || {});
   return queueCloudWrite("settings", cloudState.settings);
 };
+window.applyRemoteSettings = function(settings){
+  cloudState.settings = Object.assign({}, settings || {});
+  cloudOnline = true;
+  return structuredClone(cloudState.settings);
+};
+window.getCloudSettings = function(){ return structuredClone(cloudState.settings || {}); };
 
 dashboardSourceMode = function(){ return cloudState.settings?.dashboardSource || "all"; };
 
