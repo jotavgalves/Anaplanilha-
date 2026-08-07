@@ -14,8 +14,20 @@
     if(pageTitle&&dashboard?.classList.contains('active'))pageTitle.textContent=`Olá, ${p.name}!`;
     const badge=document.querySelector('#adminCurrentProfile');
     if(badge)badge.innerHTML=`<i data-lucide="user-round-cog"></i>Perfil atual: ${p.name}`;
+    const goalCopy=document.querySelector('.goal-selector-copy small');
+    if(goalCopy)goalCopy.textContent=`Escolha qual objetivo ${p.name} quer perseguir agora`;
     if(window.lucide)lucide.createIcons({attrs:{'stroke-width':1.9}});
   }
+
+  const baseAllPaidRows=allPaidRows;
+  allPaidRows=function(){
+    const all=baseAllPaidRows();
+    const seller=norm(cfg().sellerName||currentProfile().name);
+    const sheet=all.filter(r=>r.source==='sheet');
+    const manual=all.filter(r=>r.source==='manual');
+    const matchingSheet=sheet.filter(r=>norm(r.seller)===seller);
+    return [...(matchingSheet.length?matchingSheet:sheet),...manual];
+  };
 
   const originalSwitch=window.switchView||switchView;
   if(typeof originalSwitch==='function'){
@@ -68,12 +80,25 @@
         const response=await fetch('/api/admin-toggle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password}),cache:'no-store'});
         const data=await response.json().catch(()=>({}));
         if(!response.ok||!data.ok)throw new Error(data.error||`HTTP ${response.status}`);
-        feedback.className='admin-credential-feedback success';
-        feedback.textContent=`Perfil alterado para ${data.profileName}. Recarregando...`;
+
+        if(typeof window.applyRemoteSettings==='function')window.applyRemoteSettings(data.settings);
         input.value='';
+        sheetData=[];
+        paintIdentity();
+        if(typeof loadSettings==='function')loadSettings();
+        rebuildMonths();
+        if(typeof renderAll==='function')renderAll();
+
+        feedback.className='admin-credential-feedback success';
+        feedback.textContent=`Perfil alterado para ${data.profileName}. Sincronizando a planilha...`;
         if(typeof toast==='function')toast(`Perfil alterado para ${data.profileName}.`);
-        setTimeout(()=>window.location.reload(),500);
+
+        await sync();
+        paintIdentity();
+        if(typeof renderAll==='function')renderAll();
+        feedback.textContent=`Credenciado como ${data.profileName}. Planilha e aba atualizadas.`;
       }catch(error){
+        console.error('Falha ao alternar perfil',error);
         feedback.className='admin-credential-feedback error';
         feedback.textContent=error.message||'Não foi possível credenciar.';
       }finally{
