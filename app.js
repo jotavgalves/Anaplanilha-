@@ -1,0 +1,1 @@
+(()=>{const files=["./app-1.js","./app-2.js","./app-3.js"];const load=i=>{if(i>=files.length)return;const s=document.createElement("script");s.src=files[i];s.onload=()=>load(i+1);s.onerror=()=>console.error("Falha ao carregar",files[i]);document.body.appendChild(s)};load(0)})();
