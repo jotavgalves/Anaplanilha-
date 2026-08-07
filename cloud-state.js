@@ -17,7 +17,11 @@ async function cloudRequest(method, key, value) {
 function queueCloudWrite(key, value) {
   const snapshotValue = structuredClone(value);
   cloudWriteChain = cloudWriteChain
-    .then(() => cloudRequest("PUT", key, snapshotValue))
+    .then(async()=>{
+      const result=await cloudRequest("PUT", key, snapshotValue);
+      cloudOnline=true;
+      return result;
+    })
     .catch(error => {
       cloudOnline = false;
       if (typeof toast === "function") toast("Não consegui salvar no banco. Tente novamente.");
@@ -31,12 +35,17 @@ function oldLocalState() {
     try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
     catch (_) { return fallback; }
   };
+  const settings=read(K.settings, {});
+  try {
+    const source=localStorage.getItem("ana_v4_dashboard_source");
+    if(source&&!settings.dashboardSource)settings.dashboardSource=source;
+  } catch (_) {}
   return {
     manual: read(K.manual, []),
     pending: read(K.pending, []),
     notes: read(K.notes, {}),
     audit: read(K.audit, []),
-    settings: read(K.settings, {}),
+    settings,
     snapshot: read(K.snapshot, {})
   };
 }
@@ -116,6 +125,13 @@ compareSnapshot = function(rows){
   queueCloudWrite("snapshot", neu);
 };
 
+function showDatabaseWarning(){
+  const b=$("#banner");
+  if(!b)return;
+  b.style.display="block";
+  b.innerHTML='<b>Salvamento online não conectado.</b> Vincule um banco Cloudflare D1 ao Pages usando o binding <b>DB</b>. As vendas da planilha continuam funcionando, mas mudanças manuais ainda não ficam persistidas.';
+}
+
 sync = async function(){
   $("#syncText").textContent="Sincronizando com a planilha...";
   try{
@@ -127,7 +143,7 @@ sync = async function(){
     if(!parsed.length)throw Error("A aba retornou vazia");
     compareSnapshot(parsed);
     sheetData=parsed;
-    $("#banner").style.display="none";
+    if(cloudOnline)$("#banner").style.display="none";else showDatabaseWarning();
     $("#syncText").textContent=`Sincronizado às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
   }catch(error){
     const b=$("#banner");
