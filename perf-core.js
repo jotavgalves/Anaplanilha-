@@ -22,6 +22,6 @@ function renderAll(){
   refreshIcons();
 }
 function renderAudit(){
-  const a=JSON.parse(localStorage.getItem(K.audit)||'[]').slice(0,200);
+  const a=(window.cloudAudit?window.cloudAudit():[]).slice(0,200);
   $('#auditList').innerHTML=a.length?a.map(x=>`<div class="audititem"><time>${new Date(x.time).toLocaleString('pt-BR')}</time><div class="auditkind ${x.type}">${x.type==='delete'?'EXCLUSÃO':x.type==='change'?'ALTERAÇÃO':x.type==='add'?'ADIÇÃO':'MANUAL'}</div><div>${esc(x.msg)}</div></div>`).join(''):'<div class="empty">Nenhuma atividade registrada ainda.</div>';
 }
