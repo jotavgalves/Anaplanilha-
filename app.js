@@ -1,5 +1,5 @@
 (()=>{
-  const V='20260807-profilefix';
+  const V='20260807-profilefix2';
   const addCss=href=>{const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${V}`;document.head.appendChild(l)};
   addCss('./mobile-v2.css');
   addCss('./source-fix.css');
