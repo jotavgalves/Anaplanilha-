@@ -93,10 +93,32 @@ async function loadCloudState() {
   }
 }
 
-manuals = function(){ return cloudState.manual || []; };
-pendings = function(){ return cloudState.pending || []; };
-saveManuals = function(value){ cloudState.manual = value; return queueCloudWrite("manual", value); };
-savePendings = function(value){ cloudState.pending = value; return queueCloudWrite("pending", value); };
+function activeProfileKey(){ return cloudState.settings?.profile === "dayane" ? "dayane" : "ana"; }
+function recordProfile(item){ return item?.profile === "dayane" ? "dayane" : "ana"; }
+function sellerForProfile(profile){ return profile === "dayane" ? "Dayane" : "Ana"; }
+
+manuals = function(){
+  const profile=activeProfileKey();
+  return (cloudState.manual || []).filter(item=>recordProfile(item)===profile);
+};
+pendings = function(){
+  const profile=activeProfileKey();
+  return (cloudState.pending || []).filter(item=>recordProfile(item)===profile);
+};
+saveManuals = function(value){
+  const profile=activeProfileKey();
+  const others=(cloudState.manual || []).filter(item=>recordProfile(item)!==profile);
+  const current=(value || []).map(item=>Object.assign({},item,{profile,seller:item.seller||sellerForProfile(profile)}));
+  cloudState.manual=[...current,...others];
+  return queueCloudWrite("manual", cloudState.manual);
+};
+savePendings = function(value){
+  const profile=activeProfileKey();
+  const others=(cloudState.pending || []).filter(item=>recordProfile(item)!==profile);
+  const current=(value || []).map(item=>Object.assign({},item,{profile}));
+  cloudState.pending=[...current,...others];
+  return queueCloudWrite("pending", cloudState.pending);
+};
 
 cfg = function(){
   return Object.assign({
