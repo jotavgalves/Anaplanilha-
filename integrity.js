@@ -80,9 +80,13 @@
   }
 
   function canonicalForAudit(rows){return rows.map(canonicalSheet).map(r=>({seller:r.seller,orderId:r.orderId,clientId:r.clientId,name:r.name,value:r.value,payment:r.payment,paymentDate:r.paymentDate,status:r.status,document:r.document,phone:r.phone,email:r.email,birth:r.birth,method:r.method,installments:r.installments,description:r.description,due:r.due,delivered:r.delivered}))}
+  function auditSourceKey(){
+    const s=cfg();
+    return `${sheetId(s.sheetUrl)}::${String(s.sheetName||'').trim()}`;
+  }
 
   compareSnapshot=function(rows){
-    api('/api/sheet-audit',{method:'POST',body:JSON.stringify({rows:canonicalForAudit(rows)})}).then(data=>{
+    api('/api/sheet-audit',{method:'POST',body:JSON.stringify({sourceKey:auditSourceKey(),rows:canonicalForAudit(rows)})}).then(data=>{
       auditCache=data.audit||[];
       if((data.events||[]).length){
         const n=data.events.length;
@@ -118,7 +122,6 @@
     await loadAnnotations();
     if($('#clients')?.classList.contains('active'))renderClients();
     await refreshAudit();
-    // Reenvia o estado atual da planilha para criar/atualizar a linha de base da auditoria server-side.
     if(sheetData?.length)compareSnapshot(sheetData);else setTimeout(()=>{if(sheetData?.length)compareSnapshot(sheetData)},1500);
   })();
 })();
