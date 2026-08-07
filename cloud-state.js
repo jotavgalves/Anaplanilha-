@@ -1,5 +1,5 @@
 const CLOUD_DEFAULTS = {
-  manual: [], pending: [], notes: {}, audit: [], settings: {}, snapshot: {}
+  manual: [], pending: [], notes: {}, clientNotes: {}, audit: [], settings: {}, snapshot: {}
 };
 let cloudState = structuredClone(CLOUD_DEFAULTS);
 let cloudOnline = false;
@@ -43,6 +43,7 @@ function oldLocalState() {
     manual: read(K.manual, []),
     pending: read(K.pending, []),
     notes: read(K.notes, {}),
+    clientNotes: {},
     audit: read(K.audit, []),
     settings,
     snapshot: read(K.snapshot, {})
@@ -55,7 +56,7 @@ function hasMeaningfulLocalState(s) {
 }
 function hasMeaningfulCloudState(s) {
   return (s.manual?.length || 0) + (s.pending?.length || 0) + (s.audit?.length || 0) > 0 ||
-    Object.keys(s.notes || {}).length > 0 || Object.keys(s.settings || {}).length > 0;
+    Object.keys(s.notes || {}).length > 0 || Object.keys(s.clientNotes || {}).length > 0 || Object.keys(s.settings || {}).length > 0;
 }
 function clearLegacyLocalState() {
   [K.manual,K.pending,K.notes,K.audit,K.settings,K.snapshot,K.cache,"ana_v4_dashboard_source"].forEach(k=>localStorage.removeItem(k));
@@ -98,7 +99,14 @@ saveManuals = function(value){ cloudState.manual = value; return queueCloudWrite
 savePendings = function(value){ cloudState.pending = value; return queueCloudWrite("pending", value); };
 
 cfg = function(){
-  return Object.assign({sheetUrl:DEFAULT_SHEET_URL,sheetName:DEFAULT_SHEET_NAME,interval:60,g60:60000,g80:80000}, cloudState.settings || {});
+  return Object.assign({
+    sheetUrl:DEFAULT_SHEET_URL,
+    sheetName:DEFAULT_SHEET_NAME,
+    interval:60,
+    g40:40000,p40:3,
+    g60:60000,p60:3.5,
+    g80:80000,p80:4
+  }, cloudState.settings || {});
 };
 window.saveCloudSettings = function(patch){
   cloudState.settings = Object.assign({}, cloudState.settings || {}, patch || {});
@@ -165,6 +173,8 @@ sync = async function(){
 
 window.cloudNotes = function(){ return cloudState.notes || {}; };
 window.saveCloudNotes = function(value){ cloudState.notes = value; return queueCloudWrite("notes", value); };
+window.cloudClientNotes = function(){ return cloudState.clientNotes || {}; };
+window.saveCloudClientNotes = function(value){ cloudState.clientNotes = value; return queueCloudWrite("clientNotes", value); };
 window.cloudAudit = function(){ return cloudState.audit || []; };
 window.cloudStateOnline = function(){ return cloudOnline; };
 window.refreshCloudHealth = async function(){
