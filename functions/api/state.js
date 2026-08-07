@@ -1,4 +1,4 @@
-const ALLOWED_KEYS = new Set(["manual", "pending", "notes", "audit", "settings", "snapshot"]);
+const ALLOWED_KEYS = new Set(["manual", "pending", "notes", "clientNotes", "audit", "settings", "snapshot"]);
 
 async function ensureDatabase(db) {
   if (!db) throw new Error("D1 binding DB não configurado");
@@ -38,6 +38,7 @@ export async function onRequestGet(context) {
       manual: [],
       pending: [],
       notes: {},
+      clientNotes: {},
       audit: [],
       settings: {},
       snapshot: {}
