@@ -1,4 +1,11 @@
 (()=>{
+  const baseCfg=cfg;
+  let runtimeSettings=null;
+
+  cfg=function(){
+    return Object.assign({},baseCfg(),runtimeSettings||{});
+  };
+
   function currentProfile(){
     const s=typeof cfg==='function'?cfg():{};
     return s.profile==='dayane'?{key:'dayane',name:'Dayane'}:{key:'ana',name:'Ana'};
@@ -77,38 +84,40 @@
         return;
       }
 
+      const before=currentProfile();
+      const targetProfile=before.key==='ana'?'dayane':'ana';
+      const targetName=targetProfile==='dayane'?'Dayane':'Ana';
+
       button.disabled=true;
       feedback.className='admin-credential-feedback';
-      feedback.textContent='Validando credencial no banco...';
+      feedback.textContent=`Credenciando ${targetName}...`;
 
       try{
-        const response=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'toggleProfile',password}),cache:'no-store'});
+        const response=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'toggleProfile',password,targetProfile}),cache:'no-store'});
         const data=await response.json().catch(()=>({}));
         if(!response.ok||!data.ok)throw new Error(data.error||`HTTP ${response.status}`);
-        if(!data.settings||!data.profileName)throw new Error('O servidor não retornou o novo perfil.');
+        if(data.profile!==targetProfile||!data.settings)throw new Error('O servidor não confirmou o perfil solicitado.');
 
-        if(typeof window.applyRemoteSettings!=='function')throw new Error('Estado online ainda não foi inicializado. Atualize a página e tente novamente.');
-        window.applyRemoteSettings(data.settings);
+        runtimeSettings=data.settings;
+        if(typeof window.applyRemoteSettings==='function'){
+          try{window.applyRemoteSettings(data.settings)}catch(error){console.warn('Aplicação auxiliar do estado falhou; usando perfil confirmado pelo servidor.',error)}
+        }
+
         input.value='';
-
-        sheetData=[];
         paintIdentity();
-        if(typeof loadSettings==='function')loadSettings();
-        rebuildMonths();
-        if(typeof renderAll==='function')renderAll();
+        if(typeof loadSettings==='function'){
+          try{loadSettings()}catch(_){ }
+        }
 
         feedback.className='admin-credential-feedback success';
-        feedback.textContent=`Perfil alterado para ${data.profileName}. Buscando ${data.settings.sheetName}...`;
+        feedback.textContent=`Perfil alterado para ${data.profileName}. Reabrindo com a nova planilha...`;
         if(typeof toast==='function')toast(`Agora: ${data.profileName}.`);
 
-        await sync();
-        paintIdentity();
-        if(typeof renderAll==='function')renderAll();
-
-        const live=typeof cfg==='function'?cfg():data.settings;
-        if(live.profile!==data.profile)throw new Error('O perfil mudou no servidor, mas a interface não aplicou o novo estado.');
-        feedback.className='admin-credential-feedback success';
-        feedback.textContent=`Credenciado como ${data.profileName} • aba ${data.settings.sheetName}`;
+        setTimeout(()=>{
+          const url=new URL(window.location.href);
+          url.searchParams.set('_profileSwitch',Date.now().toString());
+          window.location.replace(url.toString());
+        },450);
       }catch(error){
         console.error('Falha ao alternar perfil',error);
         feedback.className='admin-credential-feedback error';
@@ -123,6 +132,27 @@
     paintIdentity();
   }
 
+  async function reconcileProfileWithServer(){
+    try{
+      const response=await fetch('/api/state?profile='+Date.now(),{cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      const settings=data?.state?.settings;
+      if(response.ok&&data.ok&&settings?.profile){
+        runtimeSettings=settings;
+        if(typeof window.applyRemoteSettings==='function'){
+          try{window.applyRemoteSettings(settings)}catch(_){ }
+        }
+        paintIdentity();
+        if(typeof loadSettings==='function'){
+          try{loadSettings()}catch(_){ }
+        }
+      }
+    }catch(error){
+      console.warn('Não foi possível reconciliar o perfil com o D1.',error);
+    }
+  }
+
   ensureAdminField();
   paintIdentity();
+  reconcileProfileWithServer();
 })();
