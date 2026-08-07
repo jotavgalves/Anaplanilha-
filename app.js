@@ -1,1 +1,32 @@
-(()=>{const css=document.createElement("link");css.rel="stylesheet";css.href="./mobile-perf.css";document.head.appendChild(css);const files=["./app-1.js","./app-2.js","./perf-core.js","./app-3.js","./perf-after.js"];const load=i=>{if(i>=files.length)return;const s=document.createElement("script");s.src=files[i];s.onload=()=>load(i+1);s.onerror=()=>console.error("Falha ao carregar",files[i]);document.body.appendChild(s)};load(0)})();
+(()=>{
+  const css=document.createElement("link");
+  css.rel="stylesheet";
+  css.href="./mobile.css";
+  document.head.appendChild(css);
+
+  const loadScript=src=>new Promise((resolve,reject)=>{
+    const s=document.createElement("script");
+    s.src=src;
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error(`Falha ao carregar ${src}`));
+    document.body.appendChild(s);
+  });
+
+  (async()=>{
+    try{
+      await loadScript("./app-1.js");
+      await loadScript("./cloud-state.js");
+      if(window.__cloudStateReady) await window.__cloudStateReady;
+      await loadScript("./app-2.js");
+      await loadScript("./perf-core.js");
+      await loadScript("./app-3.js");
+      await loadScript("./perf-after.js");
+      await loadScript("./cloud-after.js");
+      await loadScript("./mobile-ui.js");
+    }catch(error){
+      console.error(error);
+      const banner=document.querySelector("#banner");
+      if(banner){banner.style.display="block";banner.textContent="Falha ao iniciar o sistema. Atualize a página.";}
+    }
+  })();
+})();
