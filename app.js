@@ -1,4 +1,9 @@
 (()=>{
+  const css=document.createElement('link');
+  css.rel='stylesheet';
+  css.href='./mobile-v2.css';
+  document.head.appendChild(css);
+
   const loadScript=src=>new Promise((resolve,reject)=>{
     const s=document.createElement("script");
     s.src=src;
@@ -18,6 +23,7 @@
       await loadScript("./perf-after.js");
       await loadScript("./cloud-after.js");
       await loadScript("./mobile-ui.js");
+      await loadScript("./mobile-ui-v2.js");
     }catch(error){
       console.error(error);
       const banner=document.querySelector("#banner");
