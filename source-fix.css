@@ -1,0 +1,9 @@
+/* Hardening do seletor de fonte do dashboard */
+.source-shell{position:relative!important;z-index:4!important;isolation:isolate!important;pointer-events:auto!important}
+.source-switch{position:relative!important;z-index:5!important;pointer-events:auto!important}
+.source-switch button{position:relative!important;z-index:6!important;pointer-events:auto!important;touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}
+.source-switch button *{pointer-events:none!important}
+.source-shell::before,.source-shell::after,.source-switch::before,.source-switch::after{pointer-events:none!important}
+.drawerback:not(.open){pointer-events:none!important}
+#sourceSwitch button:focus-visible{outline:2px solid #a78bfa!important;outline-offset:2px!important}
+#sourceSwitch button.active{border-color:rgba(167,139,250,.55)!important}
