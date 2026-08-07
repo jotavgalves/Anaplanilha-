@@ -31,29 +31,27 @@ $('#saveSettings').onclick=async()=>{
   toast('Configurações salvas online.');
 };
 
-$$('#sourceSwitch [data-source-mode]').forEach(button=>{
-  button.onclick=async()=>{
-    await window.saveCloudSettings({dashboardSource:button.dataset.sourceMode});
-    syncSourceSwitch();
-    renderDashboard();
-    refreshIcons();
-  };
-});
-
 const cloudLabel=document.createElement('div');
 cloudLabel.id='cloudStatus';
-cloudLabel.className='cloud-status '+(window.cloudStateOnline&&window.cloudStateOnline()?'online':'offline');
-cloudLabel.innerHTML=window.cloudStateOnline&&window.cloudStateOnline()?'<span></span>Salvamento online':'<span></span>Banco não conectado';
+cloudLabel.className='cloud-status';
+cloudLabel.innerHTML='<span></span>Verificando banco';
 document.querySelector('.topactions')?.appendChild(cloudLabel);
+
+function paintCloudStatus(online){
+  cloudLabel.className='cloud-status '+(online?'online':'offline');
+  cloudLabel.innerHTML=online?'<span></span>Banco conectado':'<span></span>Banco não conectado';
+  const b=$('#banner');
+  if(online && b && /Persistência online|Salvamento online|banco Cloudflare D1/i.test(b.textContent||'')) b.style.display='none';
+}
+
+(async()=>{
+  const online=window.refreshCloudHealth?await window.refreshCloudHealth():(window.cloudStateOnline&&window.cloudStateOnline());
+  paintCloudStatus(!!online);
+})();
 
 const noteStatus=document.querySelector('#drawer .cardhead span');
 if(noteStatus) noteStatus.textContent='salvas online';
 const sideFooter=document.querySelector('.sidefooter');
 if(sideFooter) sideFooter.innerHTML='Google Sheets + banco online<br>Sincronização inteligente';
 
-if(!(window.cloudStateOnline&&window.cloudStateOnline())){
-  const b=$('#banner');
-  b.style.display='block';
-  b.innerHTML='<b>Persistência online ainda não conectada.</b> Crie um banco Cloudflare D1 e vincule-o ao projeto com o binding <b>DB</b>. Até isso ser feito, alterações desta sessão não ficam permanentemente salvas.';
-}
 refreshIcons();
