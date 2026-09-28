@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#080a0f">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<title>Visão Gerencial • Ana + Dayane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=20260928-1">
+</head>
+<body>
+<main class="management-shell">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">VISÃO GERENCIAL</div>
+      <h1>Ana <span>×</span> Dayane</h1>
+      <p id="syncText">Preparando comparação...</p>
+    </div>
+    <div class="top-actions">
+      <button id="refreshBtn" type="button" class="btn primary">Atualizar dados</button>
+      <a class="btn" href="/">Voltar ao painel Ana</a>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" role="status"></div>
+
+  <section class="control-card">
+    <div class="control-head">
+      <div>
+        <b>Período da análise</b>
+        <small>Por padrão as duas vendedoras são comparadas no mesmo intervalo.</small>
+      </div>
+      <label class="sync-toggle"><input id="samePeriod" type="checkbox" checked><span>Mesmo período para as duas</span></label>
+    </div>
+    <div class="period-mode-row">
+      <label>Tipo de período
+        <select id="periodMode">
+          <option value="month">Mês</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </label>
+    </div>
+    <div class="period-grid">
+      <div class="period-panel ana-accent">
+        <div class="period-name">ANA</div>
+        <label class="month-control">Mês<select id="anaMonth"></select></label>
+        <div class="custom-controls">
+          <label>De<input id="anaFrom" type="date"></label>
+          <label>Até<input id="anaTo" type="date"></label>
+        </div>
+      </div>
+      <div class="period-panel dayane-accent">
+        <div class="period-name">DAYANE</div>
+        <label class="month-control">Mês<select id="dayaneMonth"></select></label>
+        <div class="custom-controls">
+          <label>De<input id="dayaneFrom" type="date"></label>
+          <label>Até<input id="dayaneTo" type="date"></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seller-grid">
+    <article class="seller-card ana-accent">
+      <div class="seller-head"><div><small>VENDEDORA</small><h2>Ana</h2></div><span id="anaPeriodLabel">—</span></div>
+      <div class="hero-number"><span>Vendido</span><strong id="anaSales">R$ 0,00</strong></div>
+      <div class="metric-grid">
+        <div><span>Comissão</span><b id="anaCommission">R$ 0,00</b><small id="anaRate">—</small></div>
+        <div><span>Pedidos</span><b id="anaOrders">0</b><small id="anaClients">0 clientes</small></div>
+        <div><span>Ticket médio</span><b id="anaTicket">R$ 0,00</b><small>por pedido</small></div>
+        <div><span>Média diária</span><b id="anaDaily">R$ 0,00</b><small id="anaActiveDays">0 dias com venda</small></div>
+        <div><span>Projeção</span><b id="anaProjection">R$ 0,00</b><small id="anaProjectionHint">período selecionado</small></div>
+        <div><span>Próxima meta</span><b id="anaGap">—</b><small id="anaGoalLabel">—</small></div>
+      </div>
+    </article>
+
+    <article class="seller-card dayane-accent">
+      <div class="seller-head"><div><small>VENDEDORA</small><h2>Dayane</h2></div><span id="dayanePeriodLabel">—</span></div>
+      <div class="hero-number"><span>Vendido</span><strong id="dayaneSales">R$ 0,00</strong></div>
+      <div class="metric-grid">
+        <div><span>Comissão</span><b id="dayaneCommission">R$ 0,00</b><small id="dayaneRate">—</small></div>
+        <div><span>Pedidos</span><b id="dayaneOrders">0</b><small id="dayaneClients">0 clientes</small></div>
+        <div><span>Ticket médio</span><b id="dayaneTicket">R$ 0,00</b><small>por pedido</small></div>
+        <div><span>Média diária</span><b id="dayaneDaily">R$ 0,00</b><small id="dayaneActiveDays">0 dias com venda</small></div>
+        <div><span>Projeção</span><b id="dayaneProjection">R$ 0,00</b><small id="dayaneProjectionHint">período selecionado</small></div>
+        <div><span>Próxima meta</span><b id="dayaneGap">—</b><small id="dayaneGoalLabel">—</small></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="combined-card">
+    <div><span>Total das duas</span><strong id="combinedSales">R$ 0,00</strong></div>
+    <div><span>Comissões individuais somadas</span><strong id="combinedCommission">R$ 0,00</strong></div>
+    <div><span>Pedidos</span><strong id="combinedOrders">0</strong></div>
+    <div><span>Participação Ana / Dayane</span><strong id="combinedShare">—</strong></div>
+  </section>
+
+  <section class="card chart-card">
+    <div class="section-head"><div><h2>Ritmo de vendas</h2><p id="chartCaption">Comparação diária no período selecionado.</p></div></div>
+    <div class="legend"><span class="ana-dot"></span>Ana <span class="dayane-dot"></span>Dayane</div>
+    <div class="chart-wrap"><canvas id="salesChart" width="1200" height="340"></canvas></div>
+  </section>
+
+  <section class="rank-grid">
+    <article class="card"><div class="section-head"><div><h2>Melhores clientes • Ana</h2><p>Por valor pago no período.</p></div></div><div id="anaTopClients" class="rank-list"></div></article>
+    <article class="card"><div class="section-head"><div><h2>Melhores clientes • Dayane</h2><p>Por valor pago no período.</p></div></div><div id="dayaneTopClients" class="rank-list"></div></article>
+  </section>
+
+  <section class="card orders-card">
+    <div class="section-head orders-head">
+      <div><h2>Pedidos das duas</h2><p>Os dados continuam identificados por vendedora.</p></div>
+      <div class="filters">
+        <select id="sellerFilter"><option value="all">Ana + Dayane</option><option value="ana">Ana</option><option value="dayane">Dayane</option></select>
+        <input id="orderSearch" placeholder="Buscar cliente ou pedido">
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Vendedora</th><th>Pedido</th><th>Cliente</th><th>Valor</th><th>Pagamento</th><th>Status</th><th>Data</th></tr></thead><tbody id="ordersBody"></tbody></table></div>
+  </section>
+
+  <footer>Visão gerencial confidencial • Ana + Dayane</footer>
+</main>
+<script src="./app.js?v=20260928-1"></script>
+</body>
+</html>
