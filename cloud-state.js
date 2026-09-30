@@ -218,7 +218,7 @@ compareSnapshot = function(rows){
       else {
         let n=neu[id],changes=[];
         for(let [k,label] of Object.entries({name:"Cliente",value:"Valor",payment:"Pagamento",status:"Status",method:"Forma",description:"Descrição",due:"Previsão de entrega"})){
-          if(String(o[k]??"")!==String(n[k]??""))changes.push(`${label}: "${o[k]??"}" → "${n[k]??"}"`);
+          if(String(o[k]??"")!==String(n[k]??""))changes.push(`${label}: "${o[k]??""}" → "${n[k]??""}"`);
         }
         if(changes.length)auditAdd("change",`Pedido #${id} alterado: ${changes.join(" • ")}`);
       }
