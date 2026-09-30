@@ -52,7 +52,7 @@
   renderDashboard=function(){
     const k=selectedMonth();if(!k)return;
     const rows=dashboardRows(k),orders=aggregateOrders(rows),total=rows.reduce((a,r)=>a+r.value,0),c=commission(total),clientSet=new Set(rows.map(r=>r.clientId||norm(r.name)).filter(Boolean));
-    const [yy,mm]=k.split('-').map(Number),days=new Date(yy,mm,0).getDate(),today=new Date(),cur=today.getFullYear()===yy&&today.getMonth()+1===mm,elapsed=cur?Math.max(1,Math.min(today.getDate(),days)):days,remaining=cur?Math.max(0,days-today.getDate()):0,projection=cur?total/elapsed*days:total,pc=commission(projection),s=cfg();
+    const [yy,mm]=k.split('-').map(Number),days=new Date(yy,mm,0).getDate(),today=new Date(),cur=today.getFullYear()===yy&&today.getMonth()+1===mm,elapsed=cur?Math.max(1,Math.min(today.getDate(),days)):days,remaining=cur?Math.max(0,days-today.getDate()):0,projection=cur?total/elapsed*days:total,pc=commission(projection),s=cfg(),fixedBase=Math.max(0,Number(s.fixedBase)||0),goal1=Math.max(0,Number(s.g40)||0),fixedPct=goal1>0?Math.max(0,Math.min(1,total/goal1)):0,fixedValue=fixedBase*fixedPct,earnings=c.value+fixedValue;
 
     $('#kpiSales').textContent=brl(total);
     const mode=dashboardSourceMode(),hints={all:`${rows.filter(r=>r.source==='sheet').length} registros da planilha + ${rows.filter(r=>r.source==='manual').length} manuais`,sheet:'Somente Google Sheets',manual:'Somente lançamentos manuais'};
@@ -60,7 +60,7 @@
     $('#kpiOrders').textContent=orders.length;$('#kpiOrdersHint').textContent=`${clientSet.size} clientes únicos`;
     $('#kpiCommission').textContent=brl(c.value);$('#kpiCommissionHint').textContent=`Faixa atual: ${c.label} sobre tudo vendido`;
     $('#kpiProjection').textContent=brl(projection);$('#kpiProjectionHint').textContent=`Comissão projetada: ${brl(pc.value)} • ${pc.label}`;
-    $('#goalCurrent').textContent=brl(total);$('#goalCommission').textContent=brl(c.value);$('#daysLeft').textContent=cur?`${remaining} dias restantes`:'Mês encerrado';
+    $('#goalCurrent').textContent=brl(total);$('#goalCommission').textContent=brl(c.value);$('#goalFixed').textContent=brl(fixedValue);$('#goalFixedHint').textContent=`${(fixedPct*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}% da Meta 1 • base ${brl(fixedBase)}`;$('#goalEarnings').textContent=brl(earnings);$('#daysLeft').textContent=cur?`${remaining} dias restantes`:'Mês encerrado';
     $('#avgDay').textContent=brl(total/elapsed);
     $('#pendingTotal').textContent=brl(pendings().reduce((a,p)=>a+p.value,0));
 
@@ -164,14 +164,8 @@
     ensureGoalSettings();const s=cfg();$('#goal40').value=s.g40;$('#percent40').value=s.p40;$('#goal60').value=s.g60;$('#percent60').value=s.p60;$('#goal80').value=s.g80;$('#percent80').value=s.p80;
   }
   function bindGoalSettings(){
-    loadGoalSettings();
-    $('#saveSettings').onclick=async()=>{
-      const g40=Number($('#goal40').value),g60=Number($('#goal60').value),g80=Number($('#goal80').value),p40=Number($('#percent40').value),p60=Number($('#percent60').value),p80=Number($('#percent80').value);
-      if(!(g40>0&&g60>g40&&g80>g60)){toast('As metas precisam estar em ordem crescente.');return;}
-      if([p40,p60,p80].some(v=>!Number.isFinite(v)||v<0||v>100)){toast('Confira os percentuais das comissões.');return;}
-      await window.saveCloudSettings?.({sheetUrl:$('#sheetUrlInput').value.trim(),sheetName:$('#sheetNameInput').value.trim(),interval:+$('#refreshInterval').value,g40,p40,g60,p60,g80,p80,dashboardGoal:activeGoalKey});
-      setupTimer();renderDashboard();toast('Metas e configurações salvas online.');
-    };
+    // Metas, percentuais e fixo são editados exclusivamente em /duploacesso2026configuracoes.
+    return;
   }
 
   async function paintDatabaseHealth(){

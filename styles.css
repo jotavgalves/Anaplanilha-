@@ -230,3 +230,17 @@ textarea{min-height:104px;padding:13px 14px;font-size:13px}
 .editing-note.show{display:block}.form-actions{display:flex;gap:9px;align-items:center}
 @media(max-width:1050px){.app{grid-template-columns:84px 1fr}.main{padding:28px 24px 52px}.source-shell{align-items:flex-start;flex-direction:column}}
 @media(max-width:700px){.main{padding:20px 16px 45px}.hello h1{font-size:30px}.kpi-value{font-size:24px}.source-switch{width:100%;overflow:auto}.source-switch button{white-space:nowrap}}
+
+
+/* Remuneração da Ana: comissão + fixo proporcional */
+.pay-summary{display:flex;align-items:stretch;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.pay-summary .commission-pill{min-width:142px;display:flex;flex-direction:column;justify-content:center}
+.pay-summary .commission-pill span{display:block;margin-top:3px;color:#7d8798;font-size:8.5px;white-space:nowrap}
+.pay-summary .fixed-pill{border-color:rgba(155,122,248,.28);background:rgba(139,92,246,.08)}
+.pay-summary .fixed-pill small{color:#9e8bd8}
+.pay-summary .fixed-pill b{color:#c6b6ff}
+.pay-summary .total-pill{border-color:rgba(242,197,95,.28);background:rgba(242,197,95,.07)}
+.pay-summary .total-pill small{color:#c8a957}
+.pay-summary .total-pill b{color:#f1d57e}
+@media(max-width:900px){.goal-top{align-items:flex-start;flex-direction:column}.pay-summary{width:100%;justify-content:flex-start}.pay-summary .commission-pill{flex:1;min-width:150px}}
+@media(max-width:560px){.pay-summary{display:grid;grid-template-columns:1fr}.pay-summary .commission-pill{min-width:0;text-align:left}}
