@@ -46,8 +46,9 @@
     try{
       const data=await request('GET');
       managementSettings=data?.state?.managementSettings||{};
+      const legacyBase=Object.assign({},DEFAULT_RULES,data?.state?.settings||{});
       const saved=managementSettings.sellerCommissions||{};
-      sellers.forEach(key=>fill(key,saved[key]));
+      sellers.forEach(key=>fill(key,Object.assign({},legacyBase,saved[key]||{})));
     }catch(error){
       sellers.forEach(key=>fill(key,DEFAULT_RULES));
       banner('Não foi possível carregar as regras salvas: '+error.message,'error');
