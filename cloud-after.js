@@ -21,14 +21,12 @@ $('#saveSettings').onclick=async()=>{
   const next={
     sheetUrl:$('#sheetUrlInput').value.trim(),
     sheetName:$('#sheetNameInput').value.trim(),
-    interval:+$('#refreshInterval').value,
-    g60:+$('#goal60').value,
-    g80:+$('#goal80').value
+    interval:+$('#refreshInterval').value
   };
   await window.saveCloudSettings(next);
   setupTimer();
   await sync();
-  toast('Configurações salvas online.');
+  toast('Configurações operacionais salvas online.');
 };
 
 const cloudLabel=document.createElement('div');
