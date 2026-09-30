@@ -7,6 +7,7 @@
   };
   const FALLBACK_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
   const MANAGEMENT_LOCAL_KEY='ana_management_settings_v1';
+  const ANA_DIRECT_RULES_KEY='ana_rules_direct_v2';
   const state={rows:{ana:[],dayane:[]},rules:{ana:{...FALLBACK_RULES},dayane:{...FALLBACK_RULES}},loaded:false};
   function readLocalManagement(){
     try{
@@ -22,6 +23,9 @@
   }
   const managementStamp=value=>{const n=Date.parse(value?.updatedAt||'');return Number.isFinite(n)?n:0;};
   const hasManagementRules=value=>!!(value?.sellerCommissions?.ana||value?.sellerCommissions?.dayane);
+  function readDirectAnaRules(){
+    try{return JSON.parse(localStorage.getItem(ANA_DIRECT_RULES_KEY)||'null')?.rules||{};}catch(_){return {};}
+  }
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
   const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -99,7 +103,7 @@
       const chosen=useLocal?localValue:remote;
       const base={...FALLBACK_RULES,...(data?.state?.settings||{})};
       const custom=chosen?.sellerCommissions||{};
-      state.rules.ana={...base,...(custom.ana||{})};
+      state.rules.ana={...base,...(custom.ana||{}),...readDirectAnaRules()};
       state.rules.dayane={...base,...(custom.dayane||{})};
       if(useLocal){
         try{
@@ -112,7 +116,7 @@
       }
     }catch(_){
       const custom=localValue?.sellerCommissions||{};
-      state.rules.ana={...FALLBACK_RULES,...(custom.ana||{})};
+      state.rules.ana={...FALLBACK_RULES,...(custom.ana||{}),...readDirectAnaRules()};
       state.rules.dayane={...FALLBACK_RULES,...(custom.dayane||{})};
     }
   }
