@@ -2,6 +2,8 @@
   'use strict';
   const DEFAULT_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
   const LOCAL_KEY='ana_management_settings_v1';
+  const ANA_DIRECT_KEY='ana_rules_direct_v2';
+  const DAYANE_DIRECT_KEY='dayane_rules_direct_v2';
   const sellers=['ana','dayane'];
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
@@ -28,6 +30,18 @@
   }
   function writeLocal(value,pendingSync){
     try{localStorage.setItem(LOCAL_KEY,JSON.stringify({value,pendingSync:!!pendingSync,savedAt:new Date().toISOString()}));}catch(_){}
+  }
+  function writeDirectRules(rules,updatedAt){
+    try{
+      localStorage.setItem(ANA_DIRECT_KEY,JSON.stringify({rules:rules.ana,updatedAt}));
+      localStorage.setItem(DAYANE_DIRECT_KEY,JSON.stringify({rules:rules.dayane,updatedAt}));
+    }catch(_){}
+  }
+  function readDirectRules(key){
+    try{
+      const raw=JSON.parse(localStorage.getItem(key)||'null');
+      return raw?.rules||null;
+    }catch(_){return null;}
   }
   const stamp=value=>{const n=Date.parse(value?.updatedAt||'');return Number.isFinite(n)?n:0;};
   const hasRules=value=>!!(value?.sellerCommissions?.ana||value?.sellerCommissions?.dayane);
@@ -93,7 +107,10 @@
         writeLocal(remote,false);
       }
       const saved=managementSettings.sellerCommissions||{};
-      sellers.forEach(key=>fill(key,Object.assign({},legacyBase,saved[key]||{})));
+      const anaDirect=readDirectRules(ANA_DIRECT_KEY);
+      const dayaneDirect=readDirectRules(DAYANE_DIRECT_KEY);
+      fill('ana',Object.assign({},legacyBase,saved.ana||{},anaDirect||{}));
+      fill('dayane',Object.assign({},legacyBase,saved.dayane||{},dayaneDirect||{}));
     }catch(error){
       managementSettings=hasRules(localValue)?localValue:{};
       const saved=managementSettings.sellerCommissions||{};
@@ -115,6 +132,7 @@
       updatedAt:new Date().toISOString()
     });
     writeLocal(managementSettings,true);
+    writeDirectRules(rules,managementSettings.updatedAt);
     try{
       await request('PUT','managementSettings',managementSettings);
       sharedSettings=Object.assign({},sharedSettings,rules.ana);
@@ -127,6 +145,7 @@
         throw new Error('O banco não confirmou o fixo da Ana.');
       }
       writeLocal(managementSettings,false);
+      writeDirectRules(rules,managementSettings.updatedAt);
       banner('Salvo: fixo da Ana '+brl(expectedFixed)+' • fixo da Dayane '+brl(rules.dayane.fixedBase)+'. Os painéis já podem usar estes valores.','ok');
     }catch(error){
       banner('Regras salvas neste navegador. O banco não confirmou a gravação agora; a sincronização ficará pendente.','ok');
