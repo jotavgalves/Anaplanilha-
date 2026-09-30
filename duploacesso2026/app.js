@@ -6,6 +6,7 @@
     dayane:{key:'dayane',label:'Dayane',sheetId:'1yuR43gP2_kPMZpySYeiyJIJXRwGchvosa31fhigVoMw',gid:'0'}
   };
   const FALLBACK_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
+  const state={rows:{ana:[],dayane:[]},rules:{ana:{...FALLBACK_RULES},dayane:{...FALLBACK_RULES}},loaded:false};
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
   const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -259,17 +260,29 @@
   }
 
   async function sync(){
-    $('#syncText').textContent='Sincronizando Ana e Dayane...';$('#refreshBtn').disabled=true;$('#banner').classList.remove('show');
-    await loadRules();
-    const results=await Promise.allSettled([fetchSource('ana'),fetchSource('dayane')]);
-    const errors=[];
-    if(results[0].status==='fulfilled')state.rows.ana=results[0].value;else errors.push(results[0].reason?.message||'Falha ao carregar Ana');
-    if(results[1].status==='fulfilled')state.rows.dayane=results[1].value;else errors.push(results[1].reason?.message||'Falha ao carregar Dayane');
-    state.loaded=state.rows.ana.length>0||state.rows.dayane.length>0;
-    if(!$('#anaMonth').options.length&&state.loaded)initPeriods();
-    if(errors.length){$('#banner').textContent=`Atenção: ${errors.join(' • ')}`;$('#banner').classList.add('show');}
-    $('#syncText').textContent=state.loaded?`Atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`:'Não foi possível carregar as planilhas';
-    $('#refreshBtn').disabled=false;syncDisabled();render();
+    $('#syncText').textContent='Sincronizando Ana e Dayane...';
+    $('#refreshBtn').disabled=true;
+    $('#banner').classList.remove('show');
+    try{
+      await loadRules();
+      const results=await Promise.allSettled([fetchSource('ana'),fetchSource('dayane')]);
+      const errors=[];
+      if(results[0].status==='fulfilled')state.rows.ana=results[0].value;else errors.push(results[0].reason?.message||'Falha ao carregar Ana');
+      if(results[1].status==='fulfilled')state.rows.dayane=results[1].value;else errors.push(results[1].reason?.message||'Falha ao carregar Dayane');
+      state.loaded=state.rows.ana.length>0||state.rows.dayane.length>0;
+      if(!$('#anaMonth').options.length&&state.loaded)initPeriods();
+      if(errors.length){$('#banner').textContent=`Atenção: ${errors.join(' • ')}`;$('#banner').classList.add('show');}
+      $('#syncText').textContent=state.loaded?`Atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`:'Não foi possível carregar as planilhas';
+      syncDisabled();
+      render();
+    }catch(error){
+      console.error('Falha ao sincronizar painel gerencial',error);
+      $('#syncText').textContent='Falha ao sincronizar';
+      $('#banner').textContent='Erro ao atualizar o painel: '+(error?.message||'erro desconhecido');
+      $('#banner').classList.add('show');
+    }finally{
+      $('#refreshBtn').disabled=false;
+    }
   }
 
   bind();sync();
