@@ -4,6 +4,47 @@ const CLOUD_DEFAULTS = {
 let cloudState = structuredClone(CLOUD_DEFAULTS);
 let cloudOnline = false;
 let cloudWriteChain = Promise.resolve();
+const MANAGEMENT_LOCAL_KEY = "ana_management_settings_v1";
+
+function readLocalManagementEntry() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(MANAGEMENT_LOCAL_KEY) || "null");
+    if (!raw) return null;
+    if (raw.value) return raw;
+    if (raw.sellerCommissions) return { value: raw, pendingSync: false };
+  } catch (_) {}
+  return null;
+}
+function writeLocalManagementEntry(value, pendingSync) {
+  try {
+    localStorage.setItem(MANAGEMENT_LOCAL_KEY, JSON.stringify({
+      value,
+      pendingSync: !!pendingSync,
+      savedAt: new Date().toISOString()
+    }));
+  } catch (_) {}
+}
+function managementStamp(value) {
+  const n = Date.parse(value?.updatedAt || "");
+  return Number.isFinite(n) ? n : 0;
+}
+function hasManagementRules(value) {
+  return !!(value?.sellerCommissions?.ana || value?.sellerCommissions?.dayane);
+}
+async function syncPendingManagementSettings() {
+  const entry = readLocalManagementEntry();
+  if (!entry?.value || !entry.pendingSync) return false;
+  try {
+    await cloudRequest("PUT", "managementSettings", entry.value);
+    cloudState.managementSettings = entry.value;
+    writeLocalManagementEntry(entry.value, false);
+    cloudOnline = true;
+    if (typeof renderAll === "function") renderAll();
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 async function cloudRequest(method, key, value) {
   const options = { method, headers: { "Content-Type": "application/json" }, cache: "no-store" };
@@ -56,7 +97,8 @@ function hasMeaningfulLocalState(s) {
 }
 function hasMeaningfulCloudState(s) {
   return (s.manual?.length || 0) + (s.pending?.length || 0) + (s.audit?.length || 0) > 0 ||
-    Object.keys(s.notes || {}).length > 0 || Object.keys(s.clientNotes || {}).length > 0 || Object.keys(s.settings || {}).length > 0;
+    Object.keys(s.notes || {}).length > 0 || Object.keys(s.clientNotes || {}).length > 0 ||
+    Object.keys(s.settings || {}).length > 0 || hasManagementRules(s.managementSettings);
 }
 function clearLegacyLocalState() {
   [K.manual,K.pending,K.notes,K.audit,K.settings,K.snapshot,K.cache,"ana_v4_dashboard_source"].forEach(k=>localStorage.removeItem(k));
@@ -77,9 +119,31 @@ function sanitizeAdminResidue(settings){
 }
 
 async function loadCloudState() {
+  const localManagementEntry = readLocalManagementEntry();
+  if (hasManagementRules(localManagementEntry?.value)) {
+    cloudState.managementSettings = localManagementEntry.value;
+  }
   try {
     const data = await cloudRequest("GET");
     const remoteState = Object.assign(structuredClone(CLOUD_DEFAULTS), data.state || {});
+    const remoteManagement = remoteState.managementSettings || {};
+    const localManagement = localManagementEntry?.value || {};
+    const useLocalManagement = hasManagementRules(localManagement) && (
+      localManagementEntry?.pendingSync ||
+      managementStamp(localManagement) > managementStamp(remoteManagement) ||
+      !hasManagementRules(remoteManagement)
+    );
+    if (useLocalManagement) {
+      remoteState.managementSettings = localManagement;
+      try {
+        await cloudRequest("PUT", "managementSettings", localManagement);
+        writeLocalManagementEntry(localManagement, false);
+      } catch (_) {
+        writeLocalManagementEntry(localManagement, true);
+      }
+    } else if (hasManagementRules(remoteManagement)) {
+      writeLocalManagementEntry(remoteManagement, false);
+    }
     const cleaned=sanitizeAdminResidue(remoteState.settings);
     if(cleaned.changed){
       remoteState.settings=cleaned.value;
@@ -90,7 +154,9 @@ async function loadCloudState() {
 
     const legacy = oldLocalState();
     if (!hasMeaningfulCloudState(remoteState) && hasMeaningfulLocalState(legacy)) {
-      const migratedState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy);
+      const migratedState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy, {
+        managementSettings: remoteState.managementSettings || {}
+      });
       try {
         for (const key of ["manual","pending","notes","audit","settings","snapshot"]) {
           await cloudRequest("PUT", key, migratedState[key]);
@@ -107,6 +173,10 @@ async function loadCloudState() {
     return true;
   } catch (error) {
     cloudOnline = false;
+    const localEntry = readLocalManagementEntry();
+    if (hasManagementRules(localEntry?.value)) {
+      cloudState.managementSettings = localEntry.value;
+    }
     console.error("D1 indisponível", error);
     return false;
   }
@@ -151,7 +221,7 @@ compareSnapshot = function(rows){
       else {
         let n=neu[id],changes=[];
         for(let [k,label] of Object.entries({name:"Cliente",value:"Valor",payment:"Pagamento",status:"Status",method:"Forma",description:"Descrição",due:"Previsão de entrega"})){
-          if(String(o[k]??"")!==String(n[k]??""))changes.push(`${label}: "${o[k]??"}" → "${n[k]??"}"`);
+          if(String(o[k]??"")!==String(n[k]??""))changes.push(`${label}: "${o[k]??""}" → "${n[k]??""}"`);
         }
         if(changes.length)auditAdd("change",`Pedido #${id} alterado: ${changes.join(" • ")}`);
       }
@@ -202,10 +272,16 @@ window.refreshCloudHealth = async function(){
   try {
     await cloudRequest("GET");
     cloudOnline = true;
+    await syncPendingManagementSettings();
     return true;
   } catch (error) {
     cloudOnline = false;
     return false;
   }
 };
+window.syncPendingManagementSettings = syncPendingManagementSettings;
+setInterval(()=>{
+  const entry=readLocalManagementEntry();
+  if(entry?.pendingSync)syncPendingManagementSettings();
+},15000);
 window.__cloudStateReady = loadCloudState();
