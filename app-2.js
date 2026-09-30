@@ -1,6 +1,6 @@
 function renderDashboard(){
  let k=selectedMonth();if(!k)return;let rows=dashboardRows(k),orders=aggregateOrders(rows),total=rows.reduce((a,r)=>a+r.value,0),c=commission(total),clients=new Set(rows.map(r=>r.clientId||norm(r.name)).filter(Boolean));
- let [yy,mm]=k.split("-").map(Number),days=new Date(yy,mm,0).getDate(),today=new Date(),cur=today.getFullYear()===yy&&today.getMonth()+1===mm,elapsed=cur?Math.max(1,Math.min(today.getDate(),days)):days,remaining=cur?Math.max(0,days-today.getDate()):0,projection=cur?total/elapsed*days:total,pc=commission(projection),s=cfg();
+ let [yy,mm]=k.split("-").map(Number),days=new Date(yy,mm,0).getDate(),today=new Date(),cur=today.getFullYear()===yy&&today.getMonth()+1===mm,elapsed=cur?Math.max(1,Math.min(today.getDate(),days)):days,remaining=cur?Math.max(0,days-today.getDate()):0,projection=cur?total/elapsed*days:total,pc=commission(projection),s=cfg(),fixedBase=Math.max(0,Number(s.fixedBase)||0),goal1=Math.max(0,Number(s.g40)||0),fixedPct=goal1>0?Math.max(0,Math.min(1,total/goal1)):0,fixedValue=fixedBase*fixedPct,earnings=c.value+fixedValue;
  $("#kpiSales").textContent=brl(total);
  let mode=dashboardSourceMode(),hints={
   all:`${rows.filter(r=>r.source==="sheet").length} registros da planilha + ${rows.filter(r=>r.source==="manual").length} manuais`,
@@ -11,7 +11,7 @@ function renderDashboard(){
  $("#kpiOrders").textContent=orders.length;$("#kpiOrdersHint").textContent=`${clients.size} clientes únicos`;
  $("#kpiCommission").textContent=brl(c.value);$("#kpiCommissionHint").textContent=`Faixa atual: ${c.label} sobre tudo vendido`;
  $("#kpiProjection").textContent=brl(projection);$("#kpiProjectionHint").textContent=`Comissão projetada: ${brl(pc.value)} • ${pc.label}`;
- $("#goalCurrent").textContent=brl(total);$("#goalCommission").textContent=brl(c.value);$("#daysLeft").textContent=cur?`${remaining} dias restantes`:"Mês encerrado";
+ $("#goalCurrent").textContent=brl(total);$("#goalCommission").textContent=brl(c.value);$("#goalFixed").textContent=brl(fixedValue);$("#goalFixedHint").textContent=`${(fixedPct*100).toLocaleString("pt-BR",{maximumFractionDigits:1})}% da Meta 1 • base ${brl(fixedBase)}`;$("#goalEarnings").textContent=brl(earnings);$("#daysLeft").textContent=cur?`${remaining} dias restantes`:"Mês encerrado";
  $("#goalBar").style.width=`${Math.min(100,total/s.g80*100)}%`;$("#avgDay").textContent=brl(total/elapsed);$("#nextGap").textContent=total<s.g60?brl(s.g60-total):total<s.g80?brl(s.g80-total):"Faixa máxima";
  let pend=pendings().reduce((a,p)=>a+p.value,0);$("#pendingTotal").textContent=brl(pend);
  $("#tier3").classList.toggle("active",total<s.g60);$("#tier35").classList.toggle("active",total>=s.g60&&total<s.g80);$("#tier4").classList.toggle("active",total>=s.g80);
