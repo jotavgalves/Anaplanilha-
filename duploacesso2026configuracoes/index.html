@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#080a0f">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<title>Configuração gerencial • Metas, comissões e fixos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=20260930-1">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">CONFIGURAÇÃO GERENCIAL</div>
+      <h1>Metas, comissões e fixos</h1>
+      <p>Este é o único painel de edição das regras de remuneração de Ana e Dayane.</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/duploacesso2026">Voltar ao gerencial</a>
+      <button id="saveBtn" class="btn primary" type="button">Salvar regras</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" role="status"></div>
+
+  <section class="explanation">
+    <div><b>Como o fixo funciona</b><span>Fixo pago = fixo cadastrado × percentual atingido da Meta 1, limitado a 100%.</span></div>
+    <div class="example"><b>Exemplo</b><span>Meta 1 de R$ 40.000 e vendas de R$ 20.000 = 50% do fixo. Ao atingir R$ 40.000, recebe 100% do fixo.</span></div>
+  </section>
+
+  <section class="seller-grid">
+    <form class="seller-card ana" data-seller="ana" autocomplete="off">
+      <div class="seller-head"><div><small>VENDEDORA</small><h2>Ana</h2></div><span>Regras individuais</span></div>
+      <div class="fields">
+        <label>Meta 1 (R$)<input name="g40" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão base (%)<input name="p40" type="number" min="0" max="100" step="0.01" required></label>
+        <label>Meta 2 (R$)<input name="g60" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão Meta 2 (%)<input name="p60" type="number" min="0" max="100" step="0.01" required></label>
+        <label>Meta 3 (R$)<input name="g80" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão Meta 3 (%)<input name="p80" type="number" min="0" max="100" step="0.01" required></label>
+        <label class="wide">Fixo integral da Ana (R$)<input name="fixedBase" type="number" min="0" step="0.01" required></label>
+      </div>
+      <div class="rule-preview" data-preview="ana"></div>
+    </form>
+
+    <form class="seller-card dayane" data-seller="dayane" autocomplete="off">
+      <div class="seller-head"><div><small>VENDEDORA</small><h2>Dayane</h2></div><span>Regras individuais</span></div>
+      <div class="fields">
+        <label>Meta 1 (R$)<input name="g40" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão base (%)<input name="p40" type="number" min="0" max="100" step="0.01" required></label>
+        <label>Meta 2 (R$)<input name="g60" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão Meta 2 (%)<input name="p60" type="number" min="0" max="100" step="0.01" required></label>
+        <label>Meta 3 (R$)<input name="g80" type="number" min="0.01" step="0.01" required></label>
+        <label>Comissão Meta 3 (%)<input name="p80" type="number" min="0" max="100" step="0.01" required></label>
+        <label class="wide">Fixo integral da Dayane (R$)<input name="fixedBase" type="number" min="0" step="0.01" required></label>
+      </div>
+      <div class="rule-preview" data-preview="dayane"></div>
+    </form>
+  </section>
+
+  <section class="notes">
+    <b>Importante</b>
+    <p>As comissões continuam calculadas sobre o total vendido. O fixo é adicional e proporcional exclusivamente ao atingimento da Meta 1. Acima de 100% da Meta 1, o fixo não ultrapassa o valor integral cadastrado.</p>
+  </section>
+
+  <footer>Configuração confidencial • alterações salvas no banco online</footer>
+</main>
+<script src="./app.js?v=20260930-1"></script>
+</body>
+</html>
