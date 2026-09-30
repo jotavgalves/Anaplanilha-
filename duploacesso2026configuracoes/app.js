@@ -1,50 +1,21 @@
 (()=>{
   'use strict';
+
   const DEFAULT_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
-  const LOCAL_KEY='ana_management_settings_v1';
-  const ANA_DIRECT_KEY='ana_rules_direct_v2';
-  const DAYANE_DIRECT_KEY='dayane_rules_direct_v2';
   const sellers=['ana','dayane'];
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
   let managementSettings={};
-  let sharedSettings={};
 
   async function request(method,key,value){
     const options={method,headers:{'Content-Type':'application/json'},cache:'no-store'};
     if(method==='PUT')options.body=JSON.stringify({key,value});
-    const res=await fetch('/api/state',options);
+    const suffix=(method==='GET'?'?ts='+Date.now():'');
+    const res=await fetch('/api/state'+suffix,options);
     const data=await res.json().catch(()=>({}));
     if(!res.ok||!data.ok)throw new Error(data.error||('HTTP '+res.status));
     return data;
   }
-
-  function readLocal(){
-    try{
-      const raw=JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');
-      if(!raw)return null;
-      if(raw.value)return raw;
-      if(raw.sellerCommissions)return {value:raw,pendingSync:false};
-    }catch(_){}
-    return null;
-  }
-  function writeLocal(value,pendingSync){
-    try{localStorage.setItem(LOCAL_KEY,JSON.stringify({value,pendingSync:!!pendingSync,savedAt:new Date().toISOString()}));}catch(_){}
-  }
-  function writeDirectRules(rules,updatedAt){
-    try{
-      localStorage.setItem(ANA_DIRECT_KEY,JSON.stringify({rules:rules.ana,updatedAt}));
-      localStorage.setItem(DAYANE_DIRECT_KEY,JSON.stringify({rules:rules.dayane,updatedAt}));
-    }catch(_){}
-  }
-  function readDirectRules(key){
-    try{
-      const raw=JSON.parse(localStorage.getItem(key)||'null');
-      return raw?.rules||null;
-    }catch(_){return null;}
-  }
-  const stamp=value=>{const n=Date.parse(value?.updatedAt||'');return Number.isFinite(n)?n:0;};
-  const hasRules=value=>!!(value?.sellerCommissions?.ana||value?.sellerCommissions?.dayane);
 
   function formFor(key){return document.querySelector('[data-seller="'+key+'"]');}
   function current(key){
@@ -72,50 +43,20 @@
   function banner(message,type){
     const el=$('#banner');el.textContent=message;el.className='banner show '+type;
   }
-
-  async function pushPendingLocal(showMessage=false){
-    const entry=readLocal();
-    if(!entry?.value||!entry.pendingSync)return false;
-    try{
-      await request('PUT','managementSettings',entry.value);
-      writeLocal(entry.value,false);
-      managementSettings=entry.value;
-      if(showMessage)banner('Configuração local sincronizada com o banco.','ok');
-      return true;
-    }catch(_){return false;}
+  function apply(state){
+    managementSettings=state?.managementSettings||{};
+    const saved=managementSettings.sellerCommissions||{};
+    sellers.forEach(key=>fill(key,saved[key]||DEFAULT_RULES));
   }
 
   async function load(){
-    const localEntry=readLocal();
-    const localValue=localEntry?.value||{};
     try{
       const data=await request('GET');
-      const remote=data?.state?.managementSettings||{};
-      sharedSettings=Object.assign({},data?.state?.settings||{});
-      const legacyBase=Object.assign({},DEFAULT_RULES,sharedSettings);
-      const useLocal=hasRules(localValue)&&(localEntry?.pendingSync||stamp(localValue)>stamp(remote)||!hasRules(remote));
-      managementSettings=useLocal?localValue:remote;
-      if(useLocal){
-        try{
-          await request('PUT','managementSettings',localValue);
-          writeLocal(localValue,false);
-        }catch(_){
-          writeLocal(localValue,true);
-          banner('Banco indisponível. Usando a configuração salva neste navegador; a sincronização ficará pendente.','error');
-        }
-      }else if(hasRules(remote)){
-        writeLocal(remote,false);
-      }
-      const saved=managementSettings.sellerCommissions||{};
-      const anaDirect=readDirectRules(ANA_DIRECT_KEY);
-      const dayaneDirect=readDirectRules(DAYANE_DIRECT_KEY);
-      fill('ana',Object.assign({},legacyBase,saved.ana||{},anaDirect||{}));
-      fill('dayane',Object.assign({},legacyBase,saved.dayane||{},dayaneDirect||{}));
+      apply(data.state||{});
+      banner('Valores carregados do banco. Estes são os mesmos valores usados pelos painéis.','ok');
     }catch(error){
-      managementSettings=hasRules(localValue)?localValue:{};
-      const saved=managementSettings.sellerCommissions||{};
-      sellers.forEach(key=>fill(key,Object.assign({},DEFAULT_RULES,saved[key]||{})));
-      banner(hasRules(localValue)?'Banco indisponível. Carreguei as regras salvas localmente; você pode continuar usando e editando normalmente.':'Banco indisponível e ainda não há uma configuração local salva. Preencha e salve as regras abaixo.','error');
+      sellers.forEach(key=>fill(key,DEFAULT_RULES));
+      banner('Banco indisponível. Não é possível alterar as regras até a conexão voltar.','error');
     }
   }
 
@@ -126,29 +67,38 @@
       const error=valid(rules[key]);
       if(error){banner((key==='ana'?'Ana: ':'Dayane: ')+error,'error');return;}
     }
+
     const btn=$('#saveBtn');btn.disabled=true;btn.textContent='Salvando...';
-    managementSettings=Object.assign({},managementSettings,{
-      sellerCommissions:Object.assign({},managementSettings.sellerCommissions||{},rules),
-      updatedAt:new Date().toISOString()
-    });
-    writeLocal(managementSettings,true);
-    writeDirectRules(rules,managementSettings.updatedAt);
     try{
-      await request('PUT','managementSettings',managementSettings);
-      sharedSettings=Object.assign({},sharedSettings,rules.ana);
-      await request('PUT','settings',sharedSettings);
+      const next={
+        ...managementSettings,
+        sellerCommissions:{
+          ...(managementSettings.sellerCommissions||{}),
+          ana:{...rules.ana},
+          dayane:{...rules.dayane}
+        },
+        updatedAt:new Date().toISOString()
+      };
+
+      await request('PUT','managementSettings',next);
+
+      // Confirma lendo novamente exatamente o registro que os dashboards usam.
       const confirmation=await request('GET');
-      const savedFixed=Number(confirmation?.state?.managementSettings?.sellerCommissions?.ana?.fixedBase);
-      const expectedFixed=Number(rules.ana.fixedBase);
-      if(!Number.isFinite(savedFixed)||Math.abs(savedFixed-expectedFixed)>0.001){
-        writeLocal(managementSettings,true);
-        throw new Error('O banco não confirmou o fixo da Ana.');
-      }
-      writeLocal(managementSettings,false);
-      writeDirectRules(rules,managementSettings.updatedAt);
-      banner('Salvo: fixo da Ana '+brl(expectedFixed)+' • fixo da Dayane '+brl(rules.dayane.fixedBase)+'. Os painéis já podem usar estes valores.','ok');
+      const confirmed=confirmation?.state?.managementSettings||{};
+      const ana=confirmed?.sellerCommissions?.ana;
+      const dayane=confirmed?.sellerCommissions?.dayane;
+      if(!ana||!dayane)throw new Error('O banco não devolveu as regras salvas.');
+
+      const keys=['g40','p40','g60','p60','g80','p80','fixedBase'];
+      const mismatch=keys.some(k=>Number(ana[k])!==Number(rules.ana[k]))||
+        keys.some(k=>Number(dayane[k])!==Number(rules.dayane[k]));
+      if(mismatch)throw new Error('A confirmação do banco não corresponde aos valores enviados.');
+
+      managementSettings=confirmed;
+      fill('ana',ana);fill('dayane',dayane);
+      banner('Salvo e confirmado no banco • Ana: fixo '+brl(ana.fixedBase)+' • Dayane: fixo '+brl(dayane.fixedBase)+'.','ok');
     }catch(error){
-      banner('Regras salvas neste navegador. O banco não confirmou a gravação agora; a sincronização ficará pendente.','ok');
+      banner('Não foi possível salvar/confirmar no banco: '+error.message,'error');
     }finally{
       btn.disabled=false;btn.textContent='Salvar regras';
     }
@@ -156,8 +106,5 @@
 
   sellers.forEach(key=>formFor(key).addEventListener('input',()=>preview(key)));
   $('#saveBtn').addEventListener('click',save);
-  window.addEventListener('online',()=>pushPendingLocal(true));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)pushPendingLocal(false);});
-  setInterval(()=>pushPendingLocal(false),15000);
   load();
 })();

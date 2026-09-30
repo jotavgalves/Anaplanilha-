@@ -13,14 +13,14 @@
   (async()=>{
     try{
       await loadScript('./app-1.js?v=20260807-1800');
-      await loadScript('./cloud-state.js?v=20260930-5');
+      await loadScript('./cloud-state.js?v=20260930-6');
       if(window.__cloudStateReady) await window.__cloudStateReady;
       await loadScript('./app-2.js?v=20260930-2');
       await loadScript('./perf-core.js?v=20260807-1800');
       await loadScript('./audit-pre.js?v=20260807-1800');
       await loadScript('./app-3.js?v=20260807-1800');
       await loadScript('./perf-after.js?v=20260807-1800');
-      await loadScript('./cloud-after.js?v=20260807-1800');
+      await loadScript('./cloud-after.js?v=20260930-6');
       await loadScript('./mobile-ui.js?v=20260807-1800');
       await loadScript('./mobile-ui-v2.js?v=20260807-1800');
       await loadScript('./source-fix.js?v=20260807-1800');

@@ -6,26 +6,6 @@
     dayane:{key:'dayane',label:'Dayane',sheetId:'1yuR43gP2_kPMZpySYeiyJIJXRwGchvosa31fhigVoMw',gid:'0'}
   };
   const FALLBACK_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
-  const MANAGEMENT_LOCAL_KEY='ana_management_settings_v1';
-  const ANA_DIRECT_RULES_KEY='ana_rules_direct_v2';
-  const state={rows:{ana:[],dayane:[]},rules:{ana:{...FALLBACK_RULES},dayane:{...FALLBACK_RULES}},loaded:false};
-  function readLocalManagement(){
-    try{
-      const raw=JSON.parse(localStorage.getItem(MANAGEMENT_LOCAL_KEY)||'null');
-      if(!raw)return null;
-      if(raw.value)return raw;
-      if(raw.sellerCommissions)return {value:raw,pendingSync:false};
-    }catch(_){}
-    return null;
-  }
-  function writeLocalManagement(value,pendingSync){
-    try{localStorage.setItem(MANAGEMENT_LOCAL_KEY,JSON.stringify({value,pendingSync:!!pendingSync,savedAt:new Date().toISOString()}));}catch(_){}
-  }
-  const managementStamp=value=>{const n=Date.parse(value?.updatedAt||'');return Number.isFinite(n)?n:0;};
-  const hasManagementRules=value=>!!(value?.sellerCommissions?.ana||value?.sellerCommissions?.dayane);
-  function readDirectAnaRules(){
-    try{return JSON.parse(localStorage.getItem(ANA_DIRECT_RULES_KEY)||'null')?.rules||{};}catch(_){return {};}
-  }
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
   const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -92,32 +72,19 @@
   }
 
   async function loadRules(){
-    const localEntry=readLocalManagement();
-    const localValue=localEntry?.value||{};
     try{
-      const res=await fetch(`/api/state?management=${Date.now()}`,{cache:'no-store'});
-      const data=await res.json();
-      if(!res.ok||!data?.ok)throw new Error(data?.error||`HTTP ${res.status}`);
-      const remote=data?.state?.managementSettings||{};
-      const useLocal=hasManagementRules(localValue)&&(localEntry?.pendingSync||managementStamp(localValue)>managementStamp(remote)||!hasManagementRules(remote));
-      const chosen=useLocal?localValue:remote;
-      const base={...FALLBACK_RULES,...(data?.state?.settings||{})};
-      const custom=chosen?.sellerCommissions||{};
-      state.rules.ana={...base,...(custom.ana||{}),...readDirectAnaRules()};
-      state.rules.dayane={...base,...(custom.dayane||{})};
-      if(useLocal){
-        try{
-          const put=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'managementSettings',value:localValue}),cache:'no-store'});
-          const putData=await put.json().catch(()=>({}));
-          writeLocalManagement(localValue,!(put.ok&&putData?.ok));
-        }catch(_){writeLocalManagement(localValue,true);}
-      }else if(hasManagementRules(remote)){
-        writeLocalManagement(remote,false);
-      }
-    }catch(_){
-      const custom=localValue?.sellerCommissions||{};
-      state.rules.ana={...FALLBACK_RULES,...(custom.ana||{}),...readDirectAnaRules()};
+      const res=await fetch('/api/state?management='+Date.now(),{cache:'no-store'});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok||!data?.ok)throw new Error(data?.error||('HTTP '+res.status));
+      const custom=data?.state?.managementSettings?.sellerCommissions||{};
+      state.rules.ana={...FALLBACK_RULES,...(custom.ana||{})};
       state.rules.dayane={...FALLBACK_RULES,...(custom.dayane||{})};
+      return true;
+    }catch(error){
+      console.error('Não foi possível carregar as regras gerenciais do D1',error);
+      state.rules.ana={...FALLBACK_RULES};
+      state.rules.dayane={...FALLBACK_RULES};
+      return false;
     }
   }
 
