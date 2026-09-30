@@ -97,7 +97,8 @@ function hasMeaningfulLocalState(s) {
 }
 function hasMeaningfulCloudState(s) {
   return (s.manual?.length || 0) + (s.pending?.length || 0) + (s.audit?.length || 0) > 0 ||
-    Object.keys(s.notes || {}).length > 0 || Object.keys(s.clientNotes || {}).length > 0 || Object.keys(s.settings || {}).length > 0;
+    Object.keys(s.notes || {}).length > 0 || Object.keys(s.clientNotes || {}).length > 0 ||
+    Object.keys(s.settings || {}).length > 0 || hasManagementRules(s.managementSettings);
 }
 function clearLegacyLocalState() {
   [K.manual,K.pending,K.notes,K.audit,K.settings,K.snapshot,K.cache,"ana_v4_dashboard_source"].forEach(k=>localStorage.removeItem(k));
@@ -153,7 +154,9 @@ async function loadCloudState() {
 
     const legacy = oldLocalState();
     if (!hasMeaningfulCloudState(remoteState) && hasMeaningfulLocalState(legacy)) {
-      const migratedState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy);
+      const migratedState = Object.assign(structuredClone(CLOUD_DEFAULTS), legacy, {
+        managementSettings: remoteState.managementSettings || {}
+      });
       try {
         for (const key of ["manual","pending","notes","audit","settings","snapshot"]) {
           await cloudRequest("PUT", key, migratedState[key]);
