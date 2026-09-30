@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260928-1">
+<link rel="stylesheet" href="./styles.css?v=20260930-1">
 </head>
 <body>
 <main class="management-shell">
@@ -22,6 +22,7 @@
     </div>
     <div class="top-actions">
       <button id="refreshBtn" type="button" class="btn primary">Atualizar dados</button>
+      <a class="btn" href="/duploacesso2026configuracoes">Configurar metas e fixos</a>
       <a class="btn" href="/">Voltar ao painel Ana</a>
     </div>
   </header>
@@ -70,6 +71,8 @@
       <div class="hero-number"><span>Vendido</span><strong id="anaSales">R$ 0,00</strong></div>
       <div class="metric-grid">
         <div><span>Comissão</span><b id="anaCommission">R$ 0,00</b><small id="anaRate">—</small></div>
+        <div><span>Fixo proporcional</span><b id="anaFixed">R$ 0,00</b><small id="anaFixedHint">—</small></div>
+        <div><span>Total a receber</span><b id="anaEarnings">R$ 0,00</b><small id="anaEarningsHint">comissão + fixo proporcional</small></div>
         <div><span>Pedidos</span><b id="anaOrders">0</b><small id="anaClients">0 clientes</small></div>
         <div><span>Ticket médio</span><b id="anaTicket">R$ 0,00</b><small>por pedido</small></div>
         <div><span>Média diária</span><b id="anaDaily">R$ 0,00</b><small id="anaActiveDays">0 dias com venda</small></div>
@@ -83,6 +86,8 @@
       <div class="hero-number"><span>Vendido</span><strong id="dayaneSales">R$ 0,00</strong></div>
       <div class="metric-grid">
         <div><span>Comissão</span><b id="dayaneCommission">R$ 0,00</b><small id="dayaneRate">—</small></div>
+        <div><span>Fixo proporcional</span><b id="dayaneFixed">R$ 0,00</b><small id="dayaneFixedHint">—</small></div>
+        <div><span>Total a receber</span><b id="dayaneEarnings">R$ 0,00</b><small id="dayaneEarningsHint">comissão + fixo proporcional</small></div>
         <div><span>Pedidos</span><b id="dayaneOrders">0</b><small id="dayaneClients">0 clientes</small></div>
         <div><span>Ticket médio</span><b id="dayaneTicket">R$ 0,00</b><small>por pedido</small></div>
         <div><span>Média diária</span><b id="dayaneDaily">R$ 0,00</b><small id="dayaneActiveDays">0 dias com venda</small></div>
@@ -94,7 +99,9 @@
 
   <section class="combined-card">
     <div><span>Total das duas</span><strong id="combinedSales">R$ 0,00</strong></div>
-    <div><span>Comissões individuais somadas</span><strong id="combinedCommission">R$ 0,00</strong></div>
+    <div><span>Comissões somadas</span><strong id="combinedCommission">R$ 0,00</strong></div>
+    <div><span>Fixos proporcionais</span><strong id="combinedFixed">R$ 0,00</strong></div>
+    <div><span>Comissão + fixo</span><strong id="combinedEarnings">R$ 0,00</strong></div>
     <div><span>Pedidos</span><strong id="combinedOrders">0</strong></div>
     <div><span>Participação Ana / Dayane</span><strong id="combinedShare">—</strong></div>
   </section>
@@ -123,6 +130,6 @@
 
   <footer>Visão gerencial confidencial • Ana + Dayane</footer>
 </main>
-<script src="./app.js?v=20260928-1"></script>
+<script src="./app.js?v=20260930-1"></script>
 </body>
 </html>
