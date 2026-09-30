@@ -6,6 +6,7 @@
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
   let managementSettings={};
+  let sharedSettings={};
 
   async function request(method,key,value){
     const options={method,headers:{'Content-Type':'application/json'},cache:'no-store'};
@@ -76,7 +77,8 @@
     try{
       const data=await request('GET');
       const remote=data?.state?.managementSettings||{};
-      const legacyBase=Object.assign({},DEFAULT_RULES,data?.state?.settings||{});
+      sharedSettings=Object.assign({},data?.state?.settings||{});
+      const legacyBase=Object.assign({},DEFAULT_RULES,sharedSettings);
       const useLocal=hasRules(localValue)&&(localEntry?.pendingSync||stamp(localValue)>stamp(remote)||!hasRules(remote));
       managementSettings=useLocal?localValue:remote;
       if(useLocal){
@@ -115,10 +117,19 @@
     writeLocal(managementSettings,true);
     try{
       await request('PUT','managementSettings',managementSettings);
+      sharedSettings=Object.assign({},sharedSettings,rules.ana);
+      await request('PUT','settings',sharedSettings);
+      const confirmation=await request('GET');
+      const savedFixed=Number(confirmation?.state?.managementSettings?.sellerCommissions?.ana?.fixedBase);
+      const expectedFixed=Number(rules.ana.fixedBase);
+      if(!Number.isFinite(savedFixed)||Math.abs(savedFixed-expectedFixed)>0.001){
+        writeLocal(managementSettings,true);
+        throw new Error('O banco não confirmou o fixo da Ana.');
+      }
       writeLocal(managementSettings,false);
-      banner('Regras salvas no navegador e no banco. Os painéis já podem usar o novo fixo.','ok');
+      banner('Salvo: fixo da Ana '+brl(expectedFixed)+' • fixo da Dayane '+brl(rules.dayane.fixedBase)+'. Os painéis já podem usar estes valores.','ok');
     }catch(error){
-      banner('Regras salvas neste navegador. O banco está indisponível; vou sincronizar automaticamente quando ele voltar.','ok');
+      banner('Regras salvas neste navegador. O banco não confirmou a gravação agora; a sincronização ficará pendente.','ok');
     }finally{
       btn.disabled=false;btn.textContent='Salvar regras';
     }
