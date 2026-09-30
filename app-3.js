@@ -96,7 +96,7 @@ $$("#sourceSwitch [data-source-mode]").forEach(b=>b.onclick=()=>{
 });
 document.addEventListener("click",e=>{let b=e.target.closest("[data-view-go]");if(b)switchView(b.dataset.viewGo)});
 $("#refreshBtn").onclick=sync;$("#openSheet").onclick=()=>window.open(cfg().sheetUrl,"_blank");$("#monthSelect").onchange=renderAll;$("#orderSearch").oninput=renderOrders;$("#sourceFilter").onchange=renderOrders;$("#statusFilter").onchange=renderOrders;$("#clientSearch").oninput=renderClients;$("#drawerBack").onclick=closeDrawer;$("#drawerClose").onclick=closeDrawer;
-$("#saveSettings").onclick=()=>{let s=cfg();s.sheetUrl=$("#sheetUrlInput").value.trim();s.sheetName=$("#sheetNameInput").value.trim();s.interval=+$("#refreshInterval").value;s.g60=+$("#goal60").value;s.g80=+$("#goal80").value;localStorage.setItem(K.settings,JSON.stringify(s));setupTimer();sync();toast("Configurações salvas.")};
-function loadSettings(){let s=cfg();$("#sheetUrlInput").value=s.sheetUrl;$("#sheetNameInput").value=s.sheetName;$("#refreshInterval").value=String(s.interval);$("#goal60").value=s.g60;$("#goal80").value=s.g80}
+$("#saveSettings").onclick=async()=>{const patch={sheetUrl:$("#sheetUrlInput").value.trim(),sheetName:$("#sheetNameInput").value.trim(),interval:+$("#refreshInterval").value};if(window.saveCloudSettings)await window.saveCloudSettings(patch);setupTimer();sync();toast("Configurações salvas.")};
+function loadSettings(){let s=cfg();$("#sheetUrlInput").value=s.sheetUrl;$("#sheetNameInput").value=s.sheetName;$("#refreshInterval").value=String(s.interval)}
 function setupTimer(){if(timer)clearInterval(timer);let sec=cfg().interval;if(sec>0)timer=setInterval(sync,sec*1000)}
 loadSettings();$("#manualForm").elements.date.value=new Date().toISOString().slice(0,10);sheetData=EMBEDDED_DATA;rebuildMonths();renderAll();setupTimer();refreshIcons();sync();

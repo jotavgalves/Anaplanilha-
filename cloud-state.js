@@ -1,5 +1,5 @@
 const CLOUD_DEFAULTS = {
-  manual: [], pending: [], notes: {}, clientNotes: {}, audit: [], settings: {}, snapshot: {}
+  manual: [], pending: [], notes: {}, clientNotes: {}, audit: [], settings: {}, managementSettings: {}, snapshot: {}
 };
 let cloudState = structuredClone(CLOUD_DEFAULTS);
 let cloudOnline = false;
@@ -118,14 +118,16 @@ saveManuals = function(value){ cloudState.manual = value; return queueCloudWrite
 savePendings = function(value){ cloudState.pending = value; return queueCloudWrite("pending", value); };
 
 cfg = function(){
+  const anaRules=cloudState.managementSettings?.sellerCommissions?.ana || {};
   return Object.assign({
     sheetUrl:DEFAULT_SHEET_URL,
     sheetName:DEFAULT_SHEET_NAME,
     interval:60,
     g40:40000,p40:3,
     g60:60000,p60:3.5,
-    g80:80000,p80:4
-  }, cloudState.settings || {});
+    g80:80000,p80:4,
+    fixedBase:0
+  }, cloudState.settings || {}, anaRules);
 };
 window.saveCloudSettings = function(patch){
   cloudState.settings = Object.assign({}, cloudState.settings || {}, patch || {});

@@ -5,7 +5,7 @@
     ana:{key:'ana',label:'Ana',sheetId:'1EdkihhLcVQiUlJMb54RknQTHzq6RyqNhNzONvzBbTpM',sheetName:'VENDA DO MÊS'},
     dayane:{key:'dayane',label:'Dayane',sheetId:'1yuR43gP2_kPMZpySYeiyJIJXRwGchvosa31fhigVoMw',gid:'0'}
   };
-  const FALLBACK_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4};
+  const FALLBACK_RULES={g40:40000,p40:3,g60:60000,p60:3.5,g80:80000,p80:4,fixedBase:0};
   const state={rows:{ana:[],dayane:[]},rules:{ana:{...FALLBACK_RULES},dayane:{...FALLBACK_RULES}},loaded:false};
   const $=s=>document.querySelector(s);
   const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
@@ -90,6 +90,14 @@
     return {rate,value:total*rate/100,label:`${rate.toLocaleString('pt-BR',{maximumFractionDigits:2})}%`};
   }
 
+  function fixedPay(total,key){
+    const s=state.rules[key]||FALLBACK_RULES;
+    const target=Math.max(0,Number(s.g40)||0);
+    const base=Math.max(0,Number(s.fixedBase??s.fixed??0)||0);
+    const attainment=target>0?Math.max(0,Math.min(1,total/target)):0;
+    return {base,attainment,value:base*attainment,label:`${(attainment*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}% da Meta 1`};
+  }
+
   function goals(key){
     const s=state.rules[key]||FALLBACK_RULES;
     return [
@@ -125,7 +133,7 @@
 
   function stats(key){
     const rows=rowsFor(key),orders=uniqueOrders(rows),range=selectedRange(key);
-    const total=rows.reduce((a,r)=>a+r.value,0),com=commission(total,key);
+    const total=rows.reduce((a,r)=>a+r.value,0),com=commission(total,key),fixed=fixedPay(total,key);
     const clients=new Set(rows.map(r=>r.clientId||norm(r.name)).filter(Boolean));
     const activeDays=new Set(rows.map(r=>dayKey(parseDate(r.paymentDate))).filter(Boolean)).size;
     const ticket=orders.length?total/orders.length:0;
@@ -137,7 +145,7 @@
     }
     const next=goals(key).find(g=>total<g.target);
     const gap=next?Math.max(0,next.target-total):0;
-    return {key,rows,orders,range,total,com,clients:clients.size,activeDays,ticket,daily,projection,projectionHint,next,gap};
+    return {key,rows,orders,range,total,com,fixed,earnings:com.value+fixed.value,clients:clients.size,activeDays,ticket,daily,projection,projectionHint,next,gap};
   }
 
   function setText(id,value){const el=$(id);if(el)el.textContent=value;}
@@ -148,6 +156,10 @@
     setText(`#${p}Sales`,brl(s.total));
     setText(`#${p}Commission`,brl(s.com.value));
     setText(`#${p}Rate`,`${s.com.label} sobre vendas da ${SOURCES[p].label}`);
+    setText(`#${p}Fixed`,brl(s.fixed.value));
+    setText(`#${p}FixedHint`,`${s.fixed.label} • base ${brl(s.fixed.base)}`);
+    setText(`#${p}Earnings`,brl(s.earnings));
+    setText(`#${p}EarningsHint`,'comissão + fixo proporcional');
     setText(`#${p}Orders`,String(s.orders.length));
     setText(`#${p}Clients`,`${s.clients} clientes`);
     setText(`#${p}Ticket`,brl(s.ticket));
@@ -168,8 +180,8 @@
   }
 
   function renderCombined(a,d){
-    const total=a.total+d.total,comm=a.com.value+d.com.value;
-    setText('#combinedSales',brl(total));setText('#combinedCommission',brl(comm));setText('#combinedOrders',String(a.orders.length+d.orders.length));
+    const total=a.total+d.total,comm=a.com.value+d.com.value,fixed=a.fixed.value+d.fixed.value,earnings=comm+fixed;
+    setText('#combinedSales',brl(total));setText('#combinedCommission',brl(comm));setText('#combinedFixed',brl(fixed));setText('#combinedEarnings',brl(earnings));setText('#combinedOrders',String(a.orders.length+d.orders.length));
     const ap=total?a.total/total*100:0,dp=total?d.total/total*100:0;
     setText('#combinedShare',`${ap.toFixed(1).replace('.',',')}% / ${dp.toFixed(1).replace('.',',')}%`);
   }
