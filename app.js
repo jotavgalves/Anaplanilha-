@@ -13,7 +13,7 @@
   (async()=>{
     try{
       await loadScript('./app-1.js?v=20260807-1800');
-      await loadScript('./cloud-state.js?v=20260930-3');
+      await loadScript('./cloud-state.js?v=20260930-5');
       if(window.__cloudStateReady) await window.__cloudStateReady;
       await loadScript('./app-2.js?v=20260930-2');
       await loadScript('./perf-core.js?v=20260807-1800');

@@ -5,6 +5,7 @@ let cloudState = structuredClone(CLOUD_DEFAULTS);
 let cloudOnline = false;
 let cloudWriteChain = Promise.resolve();
 const MANAGEMENT_LOCAL_KEY = "ana_management_settings_v1";
+const ANA_DIRECT_RULES_KEY = "ana_rules_direct_v2";
 
 function readLocalManagementEntry() {
   try {
@@ -30,6 +31,18 @@ function managementStamp(value) {
 }
 function hasManagementRules(value) {
   return !!(value?.sellerCommissions?.ana || value?.sellerCommissions?.dayane);
+}
+function readDirectAnaRules() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ANA_DIRECT_RULES_KEY) || "null");
+    return raw?.rules && typeof raw.rules === "object" ? raw.rules : {};
+  } catch (_) {
+    return {};
+  }
+}
+function writeDirectAnaRules(rules, updatedAt) {
+  if (!rules || typeof rules !== "object") return;
+  try { localStorage.setItem(ANA_DIRECT_RULES_KEY, JSON.stringify({ rules, updatedAt: updatedAt || new Date().toISOString() })); } catch (_) {}
 }
 async function syncPendingManagementSettings() {
   const entry = readLocalManagementEntry();
@@ -144,6 +157,10 @@ async function loadCloudState() {
     } else if (hasManagementRules(remoteManagement)) {
       writeLocalManagementEntry(remoteManagement, false);
     }
+    const chosenManagement = remoteState.managementSettings || {};
+    if (chosenManagement?.sellerCommissions?.ana) {
+      writeDirectAnaRules(chosenManagement.sellerCommissions.ana, chosenManagement.updatedAt);
+    }
     const cleaned=sanitizeAdminResidue(remoteState.settings);
     if(cleaned.changed){
       remoteState.settings=cleaned.value;
@@ -189,6 +206,7 @@ savePendings = function(value){ cloudState.pending = value; return queueCloudWri
 
 cfg = function(){
   const anaRules=cloudState.managementSettings?.sellerCommissions?.ana || {};
+  const directAnaRules=readDirectAnaRules();
   return Object.assign({
     sheetUrl:DEFAULT_SHEET_URL,
     sheetName:DEFAULT_SHEET_NAME,
@@ -197,7 +215,7 @@ cfg = function(){
     g60:60000,p60:3.5,
     g80:80000,p80:4,
     fixedBase:0
-  }, cloudState.settings || {}, anaRules);
+  }, cloudState.settings || {}, anaRules, directAnaRules);
 };
 window.saveCloudSettings = function(patch){
   cloudState.settings = Object.assign({}, cloudState.settings || {}, patch || {});
